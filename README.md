@@ -42,6 +42,6 @@ The project is currently in active development. The core components implemented 
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/BachGen.git
+git clone https://github.com/NicolaDiSalvatore/BachGen.git
 cd BachGen
 pip install -r requirements.txt
