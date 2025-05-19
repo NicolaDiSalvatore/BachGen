@@ -1,12 +1,5 @@
 # BachGen
 
-[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/pytorch-1.8%2B-red)](https://pytorch.org/)
-
----
-
-## Overview
-
 **BachGen** is a deep learning project focused on generating Bach-style chorales using Transformer and VAE architectures.  
 The project is built with modular, production-oriented code aiming to incorporate MLOps practices such as reproducible training and scalable deployment.
 
