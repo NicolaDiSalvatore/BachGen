@@ -70,15 +70,11 @@ class PositionalEncoding(nn.Module):
 
 
 class MusicTransformer(nn.Module):
-    """
-    Encoder-only Transformer model for music generation.
-    Uses batch-first format and causal masking.
-    """
     def __init__(self, input_dim, model_dim, n_heads, n_layers, output_dim, dropout=0.1):
         super(MusicTransformer, self).__init__()
         self.model_dim = model_dim
 
-        self.embedding = nn.Embedding(input_dim, model_dim)
+        self.embedding = nn.Linear(input_dim, model_dim)
         self.pos_encoder = PositionalEncoding(model_dim, dropout)
 
         encoder_layer = nn.TransformerEncoderLayer(
@@ -86,33 +82,62 @@ class MusicTransformer(nn.Module):
             nhead=n_heads,
             dim_feedforward=2048,
             dropout=dropout,
-            batch_first=True  # key change
+            batch_first=True
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
-
         self.fc_out = nn.Linear(model_dim, output_dim)
 
-    def forward(self, src):
+    def forward(self, src, lengths=None):
         """
         Args:
-            src: Input tensor of token indices, shape [batch_size, seq_len]
+            src: Tensor of shape [batch_size, seq_len, input_dim]
+            lengths: Tensor of shape [batch_size] containing actual sequence lengths
         Returns:
-            Logits of shape [batch_size, seq_len, output_dim]
+            Tensor of shape [batch_size, seq_len, output_dim]
         """
         src = self.embedding(src) * math.sqrt(self.model_dim)  # [batch_size, seq_len, model_dim]
-        src = self.pos_encoder(src)  # Add positional encodings
+        src = self.pos_encoder(src)
 
-        seq_len = src.size(1)
-        mask = self.generate_causal_mask(seq_len).to(src.device)  # [seq_len, seq_len]
+        batch_size, seq_len, _ = src.size()
+        causal_mask = self.generate_causal_mask(seq_len).to(src.device)  # [seq_len, seq_len], float
 
-        output = self.transformer_encoder(src, mask=mask)  # [batch_size, seq_len, model_dim]
-        return self.fc_out(output)  # Project to [batch_size, seq_len, output_dim]
+        if lengths is not None:
+            # Create padding mask: True at PAD positions, shape [batch_size, seq_len]
+            padding_mask = torch.arange(seq_len, device=src.device).expand(batch_size, seq_len) >= lengths.unsqueeze(1)
+
+            # Convert bool padding mask to float mask with -inf for PAD tokens
+            float_padding_mask = torch.zeros_like(padding_mask, dtype=torch.float32)
+            float_padding_mask = float_padding_mask.masked_fill(padding_mask, float('-inf'))
+
+            # Expand padding mask to [batch_size * n_heads, 1, seq_len] to broadcast with causal_mask
+            n_heads = self.transformer_encoder.layers[0].self_attn.num_heads
+            float_padding_mask = float_padding_mask.unsqueeze(1).repeat(1, n_heads, 1)
+            float_padding_mask = float_padding_mask.view(batch_size * n_heads, 1, seq_len)
+
+            # Expand causal mask to [1, seq_len, seq_len] and then to [batch_size * n_heads, seq_len, seq_len]
+            causal_mask_expanded = causal_mask.unsqueeze(0).repeat(batch_size * n_heads, 1, 1)
+
+            # Combine masks by addition (float -inf masks work additively)
+            combined_mask = causal_mask_expanded + float_padding_mask
+
+            output = self.transformer_encoder(
+                src,
+                mask=combined_mask,
+                src_key_padding_mask=None
+            )
+        else:
+            # No padding mask needed
+            output = self.transformer_encoder(
+                src,
+                mask=causal_mask,
+                src_key_padding_mask=None
+            )
+
+        return self.fc_out(output)
 
     def generate_causal_mask(self, seq_len):
         """
-        Create a causal mask to prevent attention to future tokens.
-        Output shape: [seq_len, seq_len]
+        Returns a float mask for causal (autoregressive) masking.
+        Shape: [seq_len, seq_len], with 0 on and below diagonal, -inf above.
         """
-        mask = torch.full((seq_len, seq_len), float(0.0))
-        mask = mask.masked_fill(torch.triu(torch.ones(seq_len, seq_len), diagonal=1).bool(), float('-inf'))
-        return mask
+        return torch.triu(torch.full((seq_len, seq_len), float('-inf')), diagonal=1)
