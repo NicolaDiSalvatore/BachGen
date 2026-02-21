@@ -1,12 +1,3 @@
----
-title: BachGen
-emoji: 🎵
-colorFrom: purple
-colorTo: blue
-sdk: docker
-app_port: 7860
----
-
 # BachGen
 
 **BachGen** is a machine learning project for generating Bach chorales-style music.
@@ -30,7 +21,7 @@ It uses MusicTransformer architecture to generate new audio sequences and provid
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/BachGen.git
+   git clone https://github.com/NicolaDiSalvatore/BachGen
    cd BachGen
    ```
 
