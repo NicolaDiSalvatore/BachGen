@@ -17,7 +17,7 @@ from src.data.dataset import BachDataset
 from src.data.vocab import encode_pitch
 from src.models.transformer import MusicTransformer
 
-# improvement: start pitches try to put 4 values (SATB) and the average present in the training set
+# improvement: start pitches with 4 values (SATB) and the average present in the training set
 
 def generate_sequences(model: MusicTransformer, length: int, start_midi_pitch=60, temperature=1.0, top_k=0, top_p=0.9, num_sequences: int = 1):
     """
@@ -70,17 +70,12 @@ def generate_sequences(model: MusicTransformer, length: int, start_midi_pitch=60
             if p == rest_token or p == pad_token:
                 decoded_sequence.append(-1)
             else:
-                # encode_pitch: pitch - min_pitch + 2
-                # decode: token - 2 + min_pitch
                 decoded_sequence.append(int(p - 2 + min_pitch))
 
         sequence = torch.tensor(decoded_sequence)
-        # print(f"Sequence before reshape: {sequence}")
-        # Truncate to multiple of 4 if needed
         if len(sequence) % 4 != 0:
             sequence = sequence[:-(len(sequence) % 4)]
         sequence = sequence.reshape(-1, 4)
-        # print(f"Sequence after reshape: {sequence}")
         sequences.append(sequence)
     return sequences
 
@@ -108,22 +103,14 @@ def generate_music(num_sequences: int, sequence_length: int, temperature: float,
 
 
     print(f"Sequence length: {sequence_length}")
-    # mlflow.set_tracking_uri("file:///C:/Users/nicol/OneDrive/Projects/BachGen_raw/mlruns")
     experiment_name = "transformer_bach_dataset"
     experiment = mlflow.get_experiment_by_name(experiment_name)
     if experiment is None:
         print(f"Experiment '{experiment_name}' does not exist.")
     mlflow.set_experiment(experiment_name)
 
-    # mlflow.set_tracking_uri(f"file:///{project_path / 'mlruns'}")
     mlflow.set_registry_uri(f"file:///{project_path / 'mlflow_db' / 'mlflow.db'}")
 
-    # best_run_id = "89fdf40d1c9e46439c4098de7aea02d7"
-    # model_uri = f"runs:/{best_run_id}/best_model"
-
-    # model = mlflow.pytorch.load_model(
-    #    model_uri
-    # )
 
     client = MlflowClient()
     for m in client.search_registered_models():
@@ -165,7 +152,6 @@ def main():
     raw_training_set = BachDataset(split='train')
 
     parser = argparse.ArgumentParser(description="Generate music with trained MusicTransformer")
-    # parser.add_argument("--run_id", type=str, required=True, help="MLflow run ID of best model")
     parser.add_argument("--num_sequences", type=int, default=1)
     parser.add_argument("--sequence_length", type=int, default=raw_training_set.get_avg_seq_len())
     parser.add_argument("--temperature", type=float, default=1.0)

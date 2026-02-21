@@ -1,16 +1,11 @@
-# mlflow ui --backend-store-uri "sqlite:///C:/mlflow/mlflow.db"
-# view if I can Resume from a specific train_id
 
-# improvement:
-# - HIGH IMPORTANCE: DROPOUT INSIDE RESIDUALS
+
+# Improvement ideas:
 # - Add Weight Decay to Adam
-#    - add warmup scheduler wrapper (start small and gradually increase LR (evitate Loss spikes, unstable training, divergence), until now not needed
-#    - shuffle training data
+# - add warmup scheduler wrapper (start small and gradually increase LR (evitate Loss spikes, unstable training, divergence)
 # - label smoothing to cross entropy
-# - pre layer-norm instead of post layer norm
-#    - add mixed precision training: useful when using gpu, to lower memory usage (using fp16 for most of the operations, while fp32 for critical operations ) while having the same accuracy
+# - add mixed precision training: useful when using gpu, to lower memory usage (using fp16 for most of the operations, while fp32 for critical operations ) while having the same accuracy
 
-## train again with train norm
 import argparse
 import dataclasses
 import json
@@ -80,7 +75,6 @@ def download_checkpoint_from_mlflow(run_id: str, checkpoint_name: str, local_dir
     client = MlflowClient()
 
     try:
-        # List artifacts in the checkpoints folder
         artifacts = client.list_artifacts(run_id, path="checkpoints")
         checkpoint_exists = any(a.path == f"checkpoints/{checkpoint_name}" for a in artifacts)
 
@@ -88,16 +82,14 @@ def download_checkpoint_from_mlflow(run_id: str, checkpoint_name: str, local_dir
             print(f"Checkpoint {checkpoint_name} not found in MLflow run {run_id}")
             return None
 
-        # Download the checkpoint
+
         local_dir.mkdir(parents=True, exist_ok=True)
         artifact_path = f"checkpoints/{checkpoint_name}"
 
-        # Download to a temp location first, then move to target
         download_path = client.download_artifacts(run_id, artifact_path, str(local_dir.parent))
         downloaded_file = Path(download_path)
 
-        # The file is downloaded to local_dir.parent/checkpoints/checkpoint_name
-        # Move it to local_dir/checkpoint_name
+
         target_path = local_dir / checkpoint_name
         if downloaded_file != target_path:
             import shutil
@@ -153,19 +145,6 @@ def generate_configs(config: Config, search_space: dict):
         yield replace(config, **dict(zip(keys, combo)))
 
 
-# B = 1
-# L = 100
-# x = torch.randint(0, vocab_size, (B, L))
-# y = torch.randint(0, vocab_size, (B, L))
-#
-# out = model(x)
-#
-# print("out:", out.shape)
-# print("y:", y.shape)
-#
-# assert out.shape == (B, L, vocab_size)
-
-
 def evaluate_model(model: MusicTransformer, loss_fn: CrossEntropyLoss, loader: DataLoader, vocab_size: int):
     total_loss = 0
     total_tokens = 0
@@ -176,12 +155,12 @@ def evaluate_model(model: MusicTransformer, loss_fn: CrossEntropyLoss, loader: D
     with torch.no_grad():
         for i, data in enumerate(loader):
             sequences, lengths = data
-            sequences = sequences.to(DEVICE)  # Move data to GPU
+            sequences = sequences.to(DEVICE)
             inputs = sequences[:, :-1]
             targets = sequences[:, 1:]
             batch_size, seq_len = inputs.shape
             outputs = model(inputs)
-            loss = loss_fn(outputs.reshape(batch_size * seq_len, vocab_size),  # (B*L, vocab)
+            loss = loss_fn(outputs.reshape(batch_size * seq_len, vocab_size),
                            targets.reshape(batch_size * seq_len))
             total_loss += loss.item() * targets.numel()
             total_tokens += targets.numel()
@@ -207,10 +186,10 @@ def train_and_validate_one_epoch(
     total_loss = 0.0
     total_tokens = 0
 
-    optimizer.zero_grad()  # Zero gradients once before training loop
+    optimizer.zero_grad()
     for i, data in enumerate(training_loader):
         sequences, lengths = data
-        sequences = sequences.to(DEVICE)  # Move data to GPU
+        sequences = sequences.to(DEVICE)
 
         inputs = sequences[:, :-1]
         targets = sequences[:, 1:]
@@ -224,7 +203,7 @@ def train_and_validate_one_epoch(
         with autocast(enabled=torch.cuda.is_available()):
             outputs = model(inputs)
 
-            loss = loss_fn(outputs.reshape(batch_size * seq_len, vocab_size),  # (B*L, vocab)
+            loss = loss_fn(outputs.reshape(batch_size * seq_len, vocab_size),
                             targets.reshape(batch_size * seq_len)) / accumulation_steps
 
         scaler.scale(loss).backward()
@@ -234,37 +213,18 @@ def train_and_validate_one_epoch(
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             scaler.step(optimizer)
             scaler.update()
-            optimizer.zero_grad()  # Zero AFTER stepping
+            optimizer.zero_grad()
 
 
-        # running_loss += loss.item()
-        # if i % 1000 == 999:
-        #     last_loss = running_loss / 1000 # loss per batch
-        #     print('  batch {} loss: {}'.format(i + 1, last_loss))
-        #     tb_x = epoch_index * len(training_loader) + i + 1
-        #     tb_writer.add_scalar('Loss/train', last_loss, tb_x)
-        #     running_loss = 0.
-
-        # return last_loss
-
-        # New part, we evaluate epoch loss instead of batch loss
         num_tokens = targets.numel()
         total_loss += loss.item() * accumulation_steps * num_tokens
         total_tokens += num_tokens
         print(f"Loss at epoch {epoch_index} and batch {i}: {loss.item() * accumulation_steps}")
-        # print(f"Total loss at epoch {epoch_index} and batch {i}: {total_loss}")
 
     avg_train_loss = total_loss / total_tokens
     print(f"Average training loss: {avg_train_loss}")
 
     writer.add_scalar("Training Loss Per Epoch", avg_train_loss, epoch_index)
-    # mlflow.log_metrics(
-    #     {"train_loss": epoch_train_loss}, step=epoch_index
-    # )
-
-    # # Log final model
-    # mlflow.pytorch.log_model(model, name="model")
-    # torch.save(model.state_dict(), join(checkpoints_folder, f"model_epoch{epoch_index}.pt"))
 
     avg_validation_loss = evaluate_model(model, loss_fn, validation_loader, vocab_size)
     scheduler.step(avg_validation_loss)
@@ -296,7 +256,6 @@ def train_and_validate_one_epoch(
         }
     }, join(checkpoints_folder, "last.pth"))
 
-    # Upload checkpoint to MLflow artifacts (DagsHub)
     upload_checkpoint_to_mlflow(Path(checkpoints_folder) / "last.pth")
 
     writer.flush()
@@ -364,18 +323,16 @@ def train_and_validate(config: Config,
                                  attn_proj_dropout=config.attn_proj_dropout
         )
 
-    # Move model to GPU
     model = model.to(DEVICE)
     print(f"Model moved to: {DEVICE}")
 
-    # Create optimizer and scheduler AFTER model is finalized
     optimizer = AdamW(model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay)
     scheduler = ReduceLROnPlateau(
          optimizer,
-         mode='min',           # minimize validation loss
-         factor=0.5,           # halve LR on plateau
-         patience=5,           # wait 5 epochs (less than early stopping's 20)
-         threshold=1e-4       # minimum improvement threshold
+         mode='min',
+         factor=0.5,
+         patience=5,
+         threshold=1e-4
     )
 
     early_stopping = EarlyStopping(
@@ -392,7 +349,7 @@ def train_and_validate(config: Config,
         optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
         start_epoch = checkpoint["epoch"] + 1
-        # if 'early_stopping_counter' in checkpoint and 'early_stopping_best_loss' in checkpoint:
+
         early_stopping.counter = checkpoint['early_stopping_counter']
         early_stopping.best_loss = checkpoint['early_stopping_best_loss']
         print(f"Restored early stopping: counter={early_stopping.counter}, best_loss={early_stopping.best_loss}")
@@ -421,8 +378,6 @@ def train_and_validate(config: Config,
         print('EPOCH {}:'.format(epoch))
 
 
-
-        # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
         model, optimizer, scheduler, avg_train_loss, avg_validation_loss = train_and_validate_one_epoch(
             epoch, writer, model, optimizer, scheduler, early_stopping, loss_fn, checkpoints_path, training_loader, validation_loader, vocab_size, accumulation_steps, scaler)
@@ -437,7 +392,7 @@ def train_and_validate(config: Config,
             best_validation_loss = avg_validation_loss
             best_model = model
             best_epoch = epoch
-            # model_path = Path(join())'best_model_{}_{}'.format(timestamp, epoch_number)
+
             torch.save({
                 'epoch': best_epoch,
                 'model_state_dict': best_model.state_dict(),
@@ -457,7 +412,7 @@ def train_and_validate(config: Config,
                 }
             }, join(checkpoints_path, "best_val.pth"))
 
-            # Upload best checkpoint to MLflow artifacts (DagsHub)
+
             upload_checkpoint_to_mlflow(Path(checkpoints_path) / "best_val.pth")
 
         mlflow.log_metric("train_loss", avg_train_loss, step=epoch)
@@ -480,7 +435,7 @@ def start_or_resume_run(run_id: str | None = None):
 
     if run_id is not None:
         client = MlflowClient()
-        client.get_run(run_id)  # raises if invalid
+        client.get_run(run_id)
         return mlflow.start_run(run_id=run_id)
 
     else:
@@ -531,7 +486,7 @@ def main():
     min_pitch = raw_training_set.get_min_pitch()
     max_pitch = raw_training_set.get_max_pitch()
 
-    # Augmentation range: [-6, 6] -> 13 semitones total spread
+
     AUGMENT_RANGE = 6
     min_pitch_aug = min_pitch - AUGMENT_RANGE
     max_pitch_aug = max_pitch + AUGMENT_RANGE
@@ -578,7 +533,7 @@ def main():
     if args.run is not None:
         run_id = args.run
 
-        # Validate that the run exists in MLflow
+
         client = MlflowClient()
         try:
             mlflow_run = client.get_run(run_id)
@@ -586,13 +541,13 @@ def main():
         except Exception as e:
             raise ValueError(f"MLflow run {run_id} not found: {e}")
 
-        # Create local run path for checkpoints (use run_id as folder name)
+
         run_path = experiment_path / run_id
         run_path.mkdir(parents=True, exist_ok=True)
         checkpoints_dir = run_path / "checkpoints"
         checkpoints_dir.mkdir(parents=True, exist_ok=True)
 
-        # Download checkpoints from MLflow artifacts (DagsHub)
+
         print(f"Downloading checkpoints from MLflow run {run_id}...")
         if not download_checkpoints_for_resume(run_id, checkpoints_dir):
             raise FileNotFoundError(
@@ -612,7 +567,7 @@ def main():
     if args.starting_config:
         starting_config = args.starting_config
 
-    # store the config object in the mlflow run linked to run_id
+
     for i, config in enumerate(configs, start=get_starting_config_id(run_id, starting_config)):
 
         num_workers = 4 if torch.cuda.is_available() else 0
@@ -655,7 +610,7 @@ def main():
             loss_fn = CrossEntropyLoss(ignore_index=0, label_smoothing=0.1)
             params = asdict(config)
             try:
-                # Ensure all parameters are logged as strings to avoid type issues with MLflow/DagsHub
+
                 sanitized_params = {k: str(v) for k, v in params.items()}
                 mlflow.log_params(sanitized_params)
             except Exception as e:

@@ -1,15 +1,11 @@
 import pytest
 import torch
-
-# Import your model
-# adjust the import path if needed
 from src.models.transformer import Decoder, MusicTransformer
 
 
 @pytest.fixture
 def batch_size():
     return 4
-
 
 
 @pytest.fixture
@@ -75,12 +71,10 @@ def model(vocab_size, seq_len, attention_hidden_dim, feedforward_hidden_dim, num
     )
 
 
-# ------------------------
+
 # Decoder tests
-# ------------------------
 
 def test_decoder_forward_shape(decoder, batch_size, seq_len, attention_hidden_dim):
-    # Use shorter sequence length to test dynamic sizing
     short_len = seq_len // 2
     x = torch.randn(batch_size, short_len, attention_hidden_dim)
     y = decoder(x)
@@ -99,9 +93,7 @@ def test_decoder_backward(decoder, batch_size, seq_len, attention_hidden_dim):
     assert torch.isfinite(x.grad).all()
 
 
-# ------------------------
 # MusicTransformer tests
-# ------------------------
 
 def test_music_transformer_forward_shape(model, dummy_input, batch_size, seq_len, vocab_size):
     y = model(dummy_input)
@@ -112,13 +104,10 @@ def test_music_transformer_forward_shape(model, dummy_input, batch_size, seq_len
 def test_music_transformer_softmax_properties(model, dummy_input):
     y = model(dummy_input)
 
-    # Model outputs logits, apply softmax
     probs = torch.softmax(y, dim=-1)
 
-    # Probabilities should be >= 0
     assert torch.all(probs >= 0)
 
-    # Softmax over last dim should sum to 1
     probs_sum = probs.sum(dim=-1)
     assert torch.allclose(probs_sum, torch.ones_like(probs_sum), atol=1e-5)
 
@@ -129,7 +118,6 @@ def test_music_transformer_backward(model, dummy_input):
     loss = y.mean()
     loss.backward()
 
-    # Check at least one parameter received gradients
     grads = [p.grad for p in model.parameters() if p.requires_grad]
     assert any(g is not None for g in grads)
 

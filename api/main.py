@@ -20,7 +20,6 @@ from rendering.midi import sequences_to_midi
 from src.generate import generate_sequences
 from src.models.transformer import MusicTransformer
 
-# Load environment variables from .env file
 load_dotenv()
 
 
@@ -42,7 +41,6 @@ def synthesize_midi(midi_path: Path, output_wav_path: Path):
         return False
 
     try:
-        # fluidsynth -F output.wav soundfont.sf2 input.mid
         cmd = [
             "fluidsynth",
             "-F",
@@ -95,7 +93,6 @@ async def lifespan(app: FastAPI):
                 local_model_path, map_location=torch.device("cpu"), weights_only=False
             )
 
-            # Check if it's a dict with config or just the model object
             if (
                 isinstance(checkpoint, dict)
                 and "config" in checkpoint
@@ -104,13 +101,12 @@ async def lifespan(app: FastAPI):
                 config = checkpoint["config"]
                 logger.info(f"Loading model with config: {config}")
 
-                # Create model instance
                 model = MusicTransformer(
                     vocab_size=config.get("vocab_size", 92),
                     seq_len=config.get("seq_len", 2048),
                     attention_hidden_dim=config.get(
                         "attention_hidden_size", 512
-                    ),  # Handle potential key mismatch
+                    ),
                     feedforward_hidden_dim=config.get("feedforward_hidden_dim", 2048),
                     num_decoder_layers=config.get("num_decoder_layers", 6),
                     num_attention_heads=config.get("num_attention_heads", 8),
@@ -122,15 +118,12 @@ async def lifespan(app: FastAPI):
 
                 model.load_state_dict(checkpoint["model_state_dict"])
             elif isinstance(checkpoint, torch.nn.Module):
-                # Direct model load (less likely given export_model.py, but possible)
                 model = checkpoint
             else:
-                # Assuming state dict only - would require hardcoded config or extra logic
-                # For now, let's assume the structure from export_model.py
                 logger.warning(
                     "Unknown checkpoint format. Attempting to load as state dict with default config (RISKY)."
                 )
-                # Fallback to default values if needed, or raise error
+
                 raise ValueError("Invalid checkpoint format")
 
             model.eval()
@@ -196,7 +189,6 @@ def generate(req: GenerateRequest):
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:6]
     logger.info(f"Starting generation run {run_id}")
 
-    # Create temp directory for this request
     tmp_dir = Path(tempfile.mkdtemp(prefix=f"transformer_bach_dataset_{run_id}"))
 
     try:
@@ -284,7 +276,6 @@ def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch):
         midi_path = midi_paths[0]
         wav_path = tmp_dir / f"{midi_path.stem}.wav"
 
-        # Synthesize MIDI to WAV
         if synthesize_midi(midi_path, wav_path):
             return str(midi_path), str(wav_path)
         else:

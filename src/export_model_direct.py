@@ -4,7 +4,6 @@ import os
 import numpy as np
 import torch
 
-# We need to whitelist numpy globals because the checkpoints contain RNG states
 torch.serialization.add_safe_globals([np._core.multiarray._reconstruct])
 
 def export_best_model_direct(experiments_dir="experiments/transformer_bach_dataset", output_path="deploy/model.pth"):
@@ -13,8 +12,7 @@ def export_best_model_direct(experiments_dir="experiments/transformer_bach_datas
     """
     print(f"Scanning for checkpoints in {experiments_dir}...")
 
-    # Pattern to match best_val.pth in any subdirectory depth
-    # Based on ls output: experiments/transformer_bach_dataset/<run_id>/checkpoints/best_val.pth
+
     search_pattern = os.path.join(experiments_dir, "**", "best_val.pth")
     checkpoints = glob.glob(search_pattern, recursive=True)
 
@@ -29,11 +27,8 @@ def export_best_model_direct(experiments_dir="experiments/transformer_bach_datas
 
     for cp_path in checkpoints:
         try:
-            # We load on CPU to check the validation loss
-            # Use weights_only=False because we trust our own checkpoints and need to load RNG states/other metadata
             checkpoint = torch.load(cp_path, map_location='cpu', weights_only=False)
 
-            # Check if avg_validation_loss exists
             if 'avg_validation_loss' in checkpoint:
                 val_loss = checkpoint['avg_validation_loss']
                 print(f"Checked {os.path.basename(os.path.dirname(os.path.dirname(cp_path)))}: val_loss={val_loss}")
@@ -52,11 +47,10 @@ def export_best_model_direct(experiments_dir="experiments/transformer_bach_datas
         print(f"\nBest checkpoint found: {best_checkpoint_path}")
         print(f"Validation Loss: {best_val_loss}")
 
-        # Load and export
+
         try:
             checkpoint = torch.load(best_checkpoint_path, map_location='cpu', weights_only=False)
 
-            # Prepare export dictionary
             export_data = {
                 'model_state_dict': checkpoint['model_state_dict'],
                 'config': {
@@ -68,7 +62,7 @@ def export_best_model_direct(experiments_dir="experiments/transformer_bach_datas
                     'ffn_dropout': 0.0,
                     'attn_dropout': 0.0,
                     'attn_proj_dropout': 0.0,
-                    'vocab_size': 92, # Fallback, ideally get from checkpoint or known constant
+                    'vocab_size': 92,
                     'seq_len': 2048
                 }
             }

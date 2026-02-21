@@ -7,9 +7,6 @@ import yaml
 
 
 def set_seed(seed: int):
-    """
-    Set seed for reproducibility across random, numpy, and torch (CPU and GPU).
-    """
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -18,16 +15,6 @@ def set_seed(seed: int):
 
 
 def save_checkpoint(model, optimizer, epoch, val_loss, filepath):
-    """
-    Save model and optimizer state along with epoch and validation loss info.
-
-    Args:
-        model: PyTorch model instance
-        optimizer: optimizer instance
-        epoch: current epoch number (int)
-        val_loss: validation loss (float)
-        filepath: Path or str where to save the checkpoint (.pt file)
-    """
     checkpoint = {
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -40,15 +27,6 @@ def save_checkpoint(model, optimizer, epoch, val_loss, filepath):
 
 
 def load_config(config_path: str) -> dict:
-    """
-    Load YAML configuration file and return as dictionary.
-
-    Args:
-        config_path: Path or str to the YAML config file
-
-    Returns:
-        Dictionary with config parameters
-    """
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     return config

@@ -1,6 +1,5 @@
 """
 Multi-head self-attention layer for transformer model. The positional encoding are included here
-
 Should control relative positions embeddings
 """
 import math
@@ -18,12 +17,6 @@ from src.layers.softmax import Softmax
 def skew(X: Tensor) -> Tensor:
     """
     This function skew a tensor of dimension (..., L, L) as described in the section 3.4.1 of the MusicTransformer paper.
-
-    Args:
-        X (Tensor): Tensor of shape [..., L, L]
-
-    Returns:
-        Tensor: skewed tensor of shape [..., L, L]
     """
     L = X.size(-2)
     X = nn.functional.pad(X, (1,0), 'constant', 0)
@@ -95,22 +88,7 @@ class SelfAttention(Module):
         values = values.reshape(batch_size, seq_len, self.num_attention_heads, dim_attention_heads).transpose(1, 2)
 
         for h in range(self.num_attention_heads):
-            # rel_embed = self.relative_positions_embeddings[h]
 
-            # rel_embed = rel_embed[self.max_seq_len//2 - (seq_len - 1) : self.max_seq_len//2 + seq_len]
-
-            # New (Fix): Take only the last 'seq_len' elements of that window
-            # This results in shape [seq_len, dim_heads] instead of [2*seq_len-1, dim_heads]
-            # start_index = self.max_seq_len // 2 - (seq_len - 1)
-            # end_index = self.max_seq_len // 2 + seq_len
-
-            # Get the full window first (to match your logic) then slice the relevant part
-            # rel_embed = rel_embed[start_index: end_index]
-
-            # We take the last L elements (Causal history)
-            # This ensures the matrix multiplication results in (L, L)
-
-            # rel_embed = rel_embed[:seq_len]
 
             rel_embed = self.relative_positions_embeddings[h][
                   self.max_seq_len - seq_len: self.max_seq_len + seq_len - 1

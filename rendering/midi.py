@@ -48,9 +48,7 @@ def sequences_to_midi(
             for voice_idx, pitch in enumerate(timestep):
                 prev_pitch = prev_pitches[voice_idx]
 
-                # Pitch changed or rest
                 if pitch != prev_pitch:
-                    # Close previous note if it exists
                     if prev_pitch != -1:
                         note = pretty_midi.Note(
                             velocity=int(prev_velocities[voice_idx]),
@@ -60,7 +58,6 @@ def sequences_to_midi(
                         )
                         instruments[voice_idx].notes.append(note)
 
-                    # Start new note if not rest
                     if pitch != -1 and 0 <= pitch <= 127:
                         velocity = base_velocity + voice_velocity_offsets[voice_idx]
                         velocity += random.randint(
@@ -76,7 +73,6 @@ def sequences_to_midi(
 
             start_time += time_step
 
-        # Close any remaining notes at end
         for voice_idx, pitch in enumerate(prev_pitches):
             if pitch != -1:
                 note = pretty_midi.Note(
@@ -87,14 +83,12 @@ def sequences_to_midi(
                 )
                 instruments[voice_idx].notes.append(note)
 
-        # Add instruments to MIDI
         for instrument in instruments:
             pm.instruments.append(instrument)
 
         midi_dir = outputs_dir / "midi"
         midi_dir.mkdir(parents=True, exist_ok=True)
 
-        # Write MIDI file
         if timestamp is not None:
             output_path = midi_dir / f"{timestamp}_sample{idx + 1}.mid"
 
