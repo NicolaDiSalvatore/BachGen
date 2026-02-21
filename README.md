@@ -54,13 +54,10 @@ Open your browser at `http://localhost:8000/gradio`.
 
 **Quick start:**
 ```bash
-# Build the image
 docker build -t bachgen:latest .
 
-# Run the container
 docker run -p 7860:7860 bachgen:latest
 
-# Access at http://localhost:7860
 ```
 
 ## Development
