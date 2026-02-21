@@ -42,16 +42,15 @@ It uses MusicTransformer architecture to generate new audio sequences and provid
 ### Run the API
 
 ```bash
-python api/main.py
+uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
 ### Run the UI
 
-Open your browser at `http://localhost:7860` (assuming Gradio runs on default port).
+Open your browser at `http://localhost:8000/gradio`.
 
 ## Docker
 
-For deployment to Hugging Face Spaces or running in a containerized environment, see [DOCKER.md](DOCKER.md) for detailed instructions.
 
 **Quick start:**
 ```bash
