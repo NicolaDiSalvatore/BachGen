@@ -3,7 +3,6 @@ title: BachGen
 subtitle: Bach Chorale Generation with Music Transformer
 authors:
   - name: Nicola Di Salvatore
-    orcid: https://orcid.org/your-orcid-if-available
 message: If you use this software, model, or dataset, please cite this repository.
 license: MIT
 url: https://github.com/NicolaDiSalvatore/BachGen
