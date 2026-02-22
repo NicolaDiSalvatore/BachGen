@@ -47,15 +47,6 @@ coverage.xml
 cover/
 
 
-.env
-.venv/
-venv/
-env/
-ENV/
-env.bak/
-venv.bak/
-*.virtualenv
-
 .vscode/
 .idea/
 *.swp
@@ -81,19 +72,8 @@ Thumbs.db
 desktop.ini
 
 
-mlruns/
-mlflow_db/
-mlflow.db
 
-tensorboard/
-runs/
 
-experiments/
-checkpoints/
-logs/
-
-*.pt
-*.pth
 *.ckpt
 *.safetensors
 *.h5
@@ -104,14 +84,10 @@ logs/
 wandb/
 
 
-data/
-datasets/
-raw_data/
+data/midi
+data/raw/audio_midi
+data/raw/audio_wav
 
-
-outputs/
-generated/
-out/
 
 
 *.mid
@@ -122,59 +98,8 @@ out/
 *.ogg
 
 
-*.zip
-*.tar
-*.tar.gz
-*.tgz
-*.rar
-*.7z
-
-
-*.db
-*.sqlite
-*.sqlite3
-
-
-*.tmp
-*.temp
-*.bak
-*.swp
-*.swo
-.~*
-tmp/
-temp/
-
-
-.ipynb_checkpoints/
-*.ipynb_checkpoints
-
-
 .env
-.env.*
-.envrc
-!.env.example
-!.env.template
 
 
-.docker/
 
-
-*.so
-*.dylib
-*.dll
-
-
-src/mlruns/
-src/model_*
-model_*/
-
-
-src/old/
-old/
-archive/
-backup/
-
-resources/
-deploy/model.pth
-Dockerfile
 
