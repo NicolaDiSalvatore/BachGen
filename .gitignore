@@ -3,8 +3,6 @@ __pycache__/
 data/midi
 data/raw/audio_midi
 data/raw/audio_wav
-
-
 .env
 
 
