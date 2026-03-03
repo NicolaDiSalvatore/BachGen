@@ -4,37 +4,40 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e261da06-7308-4cbf-a29c-ca1b3ef62b83" name="Changes" comment="" />
+    <list default="true" id="b643a4b6-a84d-4242-8f13-2bc1b4010f95" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/BachGen.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CITATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CONTRIBUTING.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/processed/test.pt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/processed/train.pt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/processed/valid.pt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/raw/Jsb16thSeparated.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/raw/Jsb16thSeparated.npz" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/check_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/check_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/__init__.py" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <favorite-branches>
-      <branch-storage>
-        <map>
-          <entry type="LOCAL">
-            <value>
-              <list>
-                <branch-info repo="$PROJECT_DIR$" source="deploy" />
-              </list>
-            </value>
-          </entry>
-        </map>
-      </branch-storage>
-    </favorite-branches>
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="deploy" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 3
-}</component>
-  <component name="ProjectId" id="39uSNXjEgRVaMPCIuKja3kCvmY8" />
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 3
+}]]></component>
+  <component name="ProjectId" id="3ASB0uBqQwr1NOUvn3my7Lq9kcG" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -42,9 +45,19 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "C:/Users/nicol/BachGen"
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/nicol/BachGen/src",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\nicol\BachGen\src" />
+      <recent name="C:\Users\nicol\BachGen" />
+      <recent name="C:\Users\nicol\BachGen\resources" />
+      <recent name="C:\Users\nicol\BachGen\src\config" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -55,11 +68,11 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="a256451e-dae7-45e6-933a-fd577b3811c9" name="Changes" comment="" />
-      <created>1771544422338</created>
+      <changelist id="b643a4b6-a84d-4242-8f13-2bc1b4010f95" name="Changes" comment="" />
+      <created>1772575875210</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1771544422338</updated>
+      <updated>1772575875210</updated>
     </task>
     <servers />
   </component>
