@@ -172,12 +172,12 @@ logger = logging.getLogger("transformer_bach_dataset")
 logging.basicConfig(level=logging.INFO)
 
 
-@app.get("/")
+@app.get("/api/status")
 def root():
     return {"status": "BachGen API running"}
 
 
-@app.post("/generate", response_model=GenerateResponse)
+@app.post("/api/generate", response_model=GenerateResponse)
 def generate(req: GenerateRequest):
 
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:6]
@@ -221,7 +221,7 @@ def generate(req: GenerateRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/download/{run_id}")
+@app.get("/api/download/{run_id}")
 def download(run_id: str):
 
     tmp_root = Path(tempfile.gettempdir())
@@ -330,4 +330,4 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
         outputs=[midi_out, audio_out],
     )
 
-app = gr.mount_gradio_app(app, demo, path="/gradio")
+app = gr.mount_gradio_app(app, demo, path="/")
