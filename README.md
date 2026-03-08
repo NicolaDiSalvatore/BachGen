@@ -1,3 +1,16 @@
+---
+title: BachGen
+emoji: 🎼
+colorFrom: indigo
+colorTo: purple
+sdk: gradio
+sdk_version: "4.44.0"
+python_version: "3.10"
+app_file: app.py
+pinned: false
+---
+
+
 **BachGen** is a machine learning project for generating Bach chorales-style music.
 It uses MusicTransformer architecture to generate new audio sequences and provides a FastAPI backend and Gradio UI for interaction.
 
