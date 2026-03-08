@@ -25,7 +25,7 @@ The easiest way to use BachGen is through our Hugging Face Space, which provides
 
 ### Training
 ```bash
-...
+# Complete training start
 ```
 
 ### Local Deployment
