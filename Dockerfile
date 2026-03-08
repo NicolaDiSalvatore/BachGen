@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     libasound2-dev \
     libportmidi-dev \
     fluidsynth \
-    soundfont-fluid \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -20,9 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=user:user . .
 
-RUN mkdir -p /app/resources /app/deploy && \
-    curl -L -o /app/resources/052_Florestan_Ahh_Choir.sf2 \
-    "https://huggingface.co/datasets/nicola/BachGen/resolve/main/052_Florestan_Ahh_Choir.sf2" || true
+RUN mkdir -p /app/resources /app/deploy
+
+RUN python download_files.py
 
 USER user
 ENV HOME=/home/user \

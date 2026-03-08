@@ -15,22 +15,24 @@ def sequences_to_midi(
         voice_velocity_offsets=[5, -5, 0, 10],
         voice_humanization=[3, 2, 3, 2],
         tempo_bpm=72,
-        return_output_paths: bool = False
+        return_output_paths: bool = False,
+        ref_seq_len: int = None
 ):
     """
     Convert a batch of sequence tensors to MIDI files.
     """
-    len_reference_chorale = BachDataset(split='train').get_avg_seq_len()
-    print(f"Reference chorale length: {len_reference_chorale}")
+    print(f"Using tempo_bpm: {tempo_bpm}")
     voice_names = ["Soprano", "Alto", "Tenor", "Bass"]
     time_step = 60 / tempo_bpm / 4  # sixteenth note duration in seconds
+    print(f"Time step (per token): {time_step}")
 
 
     output_paths = []
     for idx, sequence in enumerate(sequences):
         # Initialize PrettyMIDI
-        time_step = time_step * len_reference_chorale / 4 / len(sequence)
+        expected_duration = time_step * len(sequence)
         print(f"Actual sequence Length: {len(sequence)}")
+        print(f"Expected duration: {expected_duration:.2f} seconds")
         pm = pretty_midi.PrettyMIDI(initial_tempo=tempo_bpm)
         instruments = [
             pretty_midi.Instrument(program=program, name=voice_names[i])

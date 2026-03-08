@@ -19,12 +19,29 @@ from src.models.transformer import MusicTransformer
 
 # improvement: start pitches with 4 values (SATB) and the average present in the training set
 
-def generate_sequences(model: MusicTransformer, length: int, start_midi_pitch=60, temperature=1.0, top_k=0, top_p=0.9, num_sequences: int = 1):
+def get_min_pitch_from_model(model):
+    if hasattr(model, 'config') and model.config is not None and 'min_pitch' in model.config:
+        return model.config['min_pitch']
+    if hasattr(model, 'min_pitch'):
+        return model.min_pitch
+    print("WARNING: min_pitch not found in model config, using default value of 36")
+    return 36
+
+
+def generate_sequences(model: MusicTransformer, length: int, start_midi_pitch=60, temperature=1.0, top_k=0, top_p=0.9, num_sequences: int = 1, seed: int = None):
     """
     Generates a music sequence using the model.
     start_sequence: tensor or list of starting tokens
+    seed: optional random seed for reproducibility
     """
-    min_pitch = BachDataset(split='train').get_min_pitch() - 6
+    if seed is not None:
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+    
+    min_pitch = get_min_pitch_from_model(model) - 6
     start_token = encode_pitch(start_midi_pitch, min_pitch)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -149,11 +166,16 @@ def generate_music(num_sequences: int, sequence_length: int, temperature: float,
 
 def main():
 
-    raw_training_set = BachDataset(split='train')
+    try:
+        raw_training_set = BachDataset(split='train')
+        default_seq_len = raw_training_set.get_avg_seq_len()
+    except FileNotFoundError:
+        print("WARNING: Could not load BachDataset, using default sequence length 256")
+        default_seq_len = 256
 
     parser = argparse.ArgumentParser(description="Generate music with trained MusicTransformer")
     parser.add_argument("--num_sequences", type=int, default=1)
-    parser.add_argument("--sequence_length", type=int, default=raw_training_set.get_avg_seq_len())
+    parser.add_argument("--sequence_length", type=int, default=default_seq_len)
     parser.add_argument("--temperature", type=float, default=1.0)
     parser.add_argument("--top_k", type=int, default=0, help="Top-k sampling (0 to disable)")
     parser.add_argument("--top_p", type=float, default=0.9, help="Top-p (nucleus) sampling (0.0 to disable)")

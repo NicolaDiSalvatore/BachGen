@@ -1,11 +1,10 @@
-__pycache__/
-.vscode/
-tests/
-.env
 src/config
 BachGen/
 BachGen1.0/
 *.pth
 repo-backup.git
 /data/
-*.sf2
+.env.bak
+.gitattributes
+.github
+.gitignore

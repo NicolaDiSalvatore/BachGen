@@ -27,17 +27,11 @@ def synthesize_midi(midi_path: Path, output_wav_path: Path):
     """
     Synthesize MIDI to WAV using fluidsynth
     """
-    soundfont_path = project_path / "resources" / "052_Florestan_Ahh_Choir.sf2"
+    soundfont_path = Path(os.getenv("SOUNDFONT_PATH", str(project_path / "resources" / "052_Florestan_Ahh_Choir.sf2")))
 
     if not soundfont_path.exists():
-        soundfont_path = Path("/usr/share/sounds/sf2/FluidR3_GM.sf2")
-
-    if not soundfont_path.exists():
-        logger.warning(f"SoundFont not found. Skipping synthesis.")
-        logger.warning(
-            f"Checked: {project_path / 'resources' / '052_Florestan_Ahh_Choir.sf2'}"
-        )
-        logger.warning(f"Checked: /usr/share/sounds/sf2/FluidR3_GM.sf2")
+        logger.warning(f"SoundFont not found at {soundfont_path}")
+        logger.warning(f"Set SOUNDFONT_PATH environment variable")
         return False
 
     try:
@@ -161,6 +155,7 @@ class GenerateRequest(BaseModel):
         0.9, ge=0.0, le=1.0, description="Top-p (nucleus) sampling (0.0 to disable)"
     )
     start_pitch: int = Field(60, ge=21, le=108, description="MIDI start pitch")
+    seed: int = Field(None, ge=0, description="Random seed for reproducibility (optional)")
 
 
 class GenerateResponse(BaseModel):
@@ -171,6 +166,7 @@ class GenerateResponse(BaseModel):
     top_k: int
     top_p: float
     start_pitch: int
+    seed: int = None
     download_url: str
 
 
@@ -178,12 +174,12 @@ logger = logging.getLogger("transformer_bach_dataset")
 logging.basicConfig(level=logging.INFO)
 
 
-@app.get("/")
+@app.get("/api/status")
 def root():
     return {"status": "BachGen API running"}
 
 
-@app.post("/generate", response_model=GenerateResponse)
+@app.post("/api/generate", response_model=GenerateResponse)
 def generate(req: GenerateRequest):
 
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:6]
@@ -200,6 +196,7 @@ def generate(req: GenerateRequest):
             top_k=req.top_k,
             top_p=req.top_p,
             num_sequences=req.n_samples,
+            seed=req.seed,
         )
 
         midi_paths = sequences_to_midi(sequences, tmp_dir, return_output_paths=True)
@@ -219,6 +216,7 @@ def generate(req: GenerateRequest):
             top_k=req.top_k,
             top_p=req.top_p,
             start_pitch=req.start_pitch,
+            seed=req.seed,
             download_url=f"/download/{run_id}",
         )
 
@@ -227,7 +225,7 @@ def generate(req: GenerateRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/download/{run_id}")
+@app.get("/api/download/{run_id}")
 def download(run_id: str):
 
     tmp_root = Path(tempfile.gettempdir())
@@ -246,7 +244,7 @@ def download(run_id: str):
     )
 
 
-def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch):
+def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch, tempo_bpm, seed):
     """
     Wrapper for Gradio interface
     """
@@ -255,9 +253,14 @@ def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch):
         raise gr.Error("Model not loaded yet. Please wait a moment.")
 
     try:
+        tempo_value = int(tempo_bpm)
+        logger.info(f"Generating with tempo_bpm: {tempo_value}, seed: {seed}")
+        
         run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         tmp_dir = Path(tempfile.mkdtemp(prefix=f"gradio_bach_{run_id}"))
 
+        seed_value = int(seed) if seed is not None and seed > 0 else None
+        
         sequences = generate_sequences(
             model=model,
             length=int(length_tokens),
@@ -266,9 +269,10 @@ def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch):
             top_k=int(top_k),
             top_p=float(top_p),
             num_sequences=1,
+            seed=seed_value,
         )
 
-        midi_paths = sequences_to_midi(sequences, tmp_dir, return_output_paths=True)
+        midi_paths = sequences_to_midi(sequences, tmp_dir, return_output_paths=True, tempo_bpm=tempo_value)
 
         if not midi_paths:
             raise gr.Error("No sequences generated")
@@ -292,8 +296,8 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
 
     with gr.Row():
         with gr.Column():
-            length_slider = gr.Slider(
-                minimum=32, maximum=1024, value=256, step=16, label="Length (Tokens)"
+            length_input = gr.Number(
+                label="Length (Tokens)", value=256, minimum=32, step=16
             )
             start_pitch_slider = gr.Slider(
                 minimum=36, maximum=84, value=60, step=1, label="Start Pitch (MIDI)"
@@ -311,6 +315,12 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
             top_p_slider = gr.Slider(
                 minimum=0.0, maximum=1.0, value=0.9, step=0.01, label="Top-P (Nucleus)"
             )
+            tempo_slider = gr.Slider(
+                minimum=40, maximum=180, value=50, step=1, label="Tempo (BPM)"
+            )
+            seed_input = gr.Number(
+                label="Seed (0 for random)", value=0, minimum=0, step=1
+            )
             gen_btn = gr.Button("Generate Music", variant="primary")
 
         with gr.Column():
@@ -320,13 +330,15 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
     gen_btn.click(
         fn=gradio_generate,
         inputs=[
-            length_slider,
+            length_input,
             temp_slider,
             top_k_slider,
             top_p_slider,
             start_pitch_slider,
+            tempo_slider,
+            seed_input,
         ],
         outputs=[midi_out, audio_out],
     )
 
-app = gr.mount_gradio_app(app, demo, path="/gradio")
+app = gr.mount_gradio_app(app, demo, path="/")
