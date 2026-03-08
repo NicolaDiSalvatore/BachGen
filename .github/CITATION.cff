@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: BachGen
+subtitle: Bach Chorale Generation with Music Transformer
+authors:
+  - name: Nicola Di Salvatore
+message: If you use this software, model, or dataset, please cite this repository.
+license: MIT
+url: https://github.com/NicolaDiSalvatore/BachGen
+repository-code: https://github.com/NicolaDiSalvatore/BachGen
+repository-artifact: https://huggingface.co/spaces/NicolaDiSalvatore/BachGen
+keywords:
+  - music generation
+  - transformer
+  - deep learning
+  - Bach chorales
+  - machine learning
+  - genAI
+  - generative AI
+	

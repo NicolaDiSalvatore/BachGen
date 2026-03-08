@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  bachgen:
+    build: .
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./deploy:/app/deploy
+      - ./resources:/app/resources
+    environment:
+      - PYTHONUNBUFFERED=1

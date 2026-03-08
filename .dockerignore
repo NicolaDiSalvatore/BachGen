@@ -1,0 +1,10 @@
+src/config
+BachGen/
+BachGen1.0/
+*.pth
+repo-backup.git
+/data/
+.env.bak
+.gitattributes
+.github
+.gitignore
