@@ -26,11 +26,11 @@ BachGen is a music generation system that creates polyphonic chorales in the sty
 
 The easiest way to use BachGen is through our Hugging Face Space, which provides a built-in Gradio interface:
 
-- Adjustable generation length (32–2048 tokens)
-- Start pitch control (MIDI note 36–84)
+- Adjustable generation length
+- Start pitch control
 - Temperature slider for creativity/accuracy trade-off
 - Top-k and top-p sampling parameters
-- Tempo control (40–180 BPM)
+- Tempo control
 - MIDI download and optional audio playback
 
 ## Quick Start
@@ -80,20 +80,20 @@ iwr -Uri "http://localhost:7860/api/download/$run_id" -OutFile "bachgen_output.z
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `n_samples` | Number of sequences to generate | 1 |
-| `sequence_length` | Length of generated sequence (tokens) | 1024 |
-| `temperature` | Sampling temperature (higher = more creative) | 1.0 |
-| `top_k` | Top-k sampling (0 to disable) | 0 |
-| `top_p` | Top-p (nucleus) sampling probability | 0.9 |
-| `start_pitch` | Starting MIDI pitch | 60 |
-| `seed` | Random seed for reproducibility (0 = random) | 0 |
+| `n_samples` | Number of sequences to generate | 1       |
+| `sequence_length` | Length of generated sequence (tokens) | 256     |
+| `temperature` | Sampling temperature (higher = more creative) | 1.0     |
+| `top_k` | Top-k sampling (0 to disable) | 0       |
+| `top_p` | Top-p (nucleus) sampling probability | 0.9     |
+| `start_pitch` | Starting MIDI pitch | 60      |
+| `seed` | Random seed for reproducibility (0 = random) | 0       |
 
 
 ## Requirements
 
 - Python 3.10+
 - PyTorch 2.0+
-- fluidsynth (optional, for WAV synthesis)
+- fluidsynth
 
 ## License
 
