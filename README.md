@@ -1,16 +1,3 @@
----
-title: BachGen
-emoji: 🎼
-colorFrom: indigo
-colorTo: purple
-sdk: gradio
-sdk_version: "4.44.0"
-python_version: "3.10"
-app_file: deploy/app.py
-pinned: false
----
-
-
 **BachGen** is a machine learning project for generating Bach chorales-style music.
 It uses MusicTransformer architecture to generate new audio sequences and provides a FastAPI backend and Gradio UI for interaction.
 
@@ -35,6 +22,11 @@ The easiest way to use BachGen is through our Hugging Face Space, which provides
 - MIDI download and optional audio playback
 
 ## Quick Start
+
+### Training
+```bash
+...
+```
 
 ### Local Deployment
 
@@ -90,28 +82,9 @@ iwr -Uri "http://localhost:7860/api/download/$run_id" -OutFile "bachgen_output.z
 | `seed` | Random seed for reproducibility (0 = random) | 0       |
 
 
-## Requirements
-
-- Python 3.10+
-- PyTorch 2.0+
-- fluidsynth
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## References
 Full BibTeX citations available in [`references.bib`](./references.bib).
-### Papers
-- Huang, C.-Z. A., Vaswani, A., Uszkoreit, J., Shazeer, N., Simon, I., Hawthorne, C., Dai, A. M.,
-  Hoffman, M. D., Dinculescu, M., & Eck, D. (2018). *Music Transformer*. arXiv:1809.04281.
-  https://arxiv.org/abs/1809.04281
-
-### Dataset
-- Boulanger-Lewandowski, N., Bengio, Y., & Vincent, P. (2012). *Modeling Temporal Dependencies
-  in High-Dimensional Sequences: Application to Polyphonic Music Generation and Transcription*.
-  arXiv:1206.6392. https://arxiv.org/abs/1206.6392
-
-### Soundfont
-- *Florestan Ahh Choir* [SF2 soundfont]. Public domain.
-  https://musical-artifacts.com/artifacts/388
