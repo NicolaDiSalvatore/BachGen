@@ -85,7 +85,7 @@ iwr -Uri "http://localhost:7860/api/download/$run_id" -OutFile "bachgen_output.z
 
 ## License
 
-MIT License - see LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## References
 Full BibTeX citations available in [`references.bib`](./references.bib).
