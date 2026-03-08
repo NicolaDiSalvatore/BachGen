@@ -155,6 +155,7 @@ class GenerateRequest(BaseModel):
         0.9, ge=0.0, le=1.0, description="Top-p (nucleus) sampling (0.0 to disable)"
     )
     start_pitch: int = Field(60, ge=21, le=108, description="MIDI start pitch")
+    seed: int = Field(None, ge=0, description="Random seed for reproducibility (optional)")
 
 
 class GenerateResponse(BaseModel):
@@ -165,6 +166,7 @@ class GenerateResponse(BaseModel):
     top_k: int
     top_p: float
     start_pitch: int
+    seed: int = None
     download_url: str
 
 
@@ -194,6 +196,7 @@ def generate(req: GenerateRequest):
             top_k=req.top_k,
             top_p=req.top_p,
             num_sequences=req.n_samples,
+            seed=req.seed,
         )
 
         midi_paths = sequences_to_midi(sequences, tmp_dir, return_output_paths=True)
@@ -213,6 +216,7 @@ def generate(req: GenerateRequest):
             top_k=req.top_k,
             top_p=req.top_p,
             start_pitch=req.start_pitch,
+            seed=req.seed,
             download_url=f"/download/{run_id}",
         )
 
@@ -240,7 +244,7 @@ def download(run_id: str):
     )
 
 
-def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch, tempo_bpm):
+def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch, tempo_bpm, seed):
     """
     Wrapper for Gradio interface
     """
@@ -250,11 +254,13 @@ def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch, tempo
 
     try:
         tempo_value = int(tempo_bpm)
-        logger.info(f"Generating with tempo_bpm: {tempo_value}")
+        logger.info(f"Generating with tempo_bpm: {tempo_value}, seed: {seed}")
         
         run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         tmp_dir = Path(tempfile.mkdtemp(prefix=f"gradio_bach_{run_id}"))
 
+        seed_value = int(seed) if seed is not None and seed > 0 else None
+        
         sequences = generate_sequences(
             model=model,
             length=int(length_tokens),
@@ -263,6 +269,7 @@ def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch, tempo
             top_k=int(top_k),
             top_p=float(top_p),
             num_sequences=1,
+            seed=seed_value,
         )
 
         midi_paths = sequences_to_midi(sequences, tmp_dir, return_output_paths=True, tempo_bpm=tempo_value)
@@ -311,6 +318,9 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
             tempo_slider = gr.Slider(
                 minimum=40, maximum=180, value=50, step=1, label="Tempo (BPM)"
             )
+            seed_input = gr.Number(
+                label="Seed (0 for random)", value=0, minimum=0, step=1
+            )
             gen_btn = gr.Button("Generate Music", variant="primary")
 
         with gr.Column():
@@ -326,6 +336,7 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
             top_p_slider,
             start_pitch_slider,
             tempo_slider,
+            seed_input,
         ],
         outputs=[midi_out, audio_out],
     )

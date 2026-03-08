@@ -28,11 +28,19 @@ def get_min_pitch_from_model(model):
     return 36
 
 
-def generate_sequences(model: MusicTransformer, length: int, start_midi_pitch=60, temperature=1.0, top_k=0, top_p=0.9, num_sequences: int = 1):
+def generate_sequences(model: MusicTransformer, length: int, start_midi_pitch=60, temperature=1.0, top_k=0, top_p=0.9, num_sequences: int = 1, seed: int = None):
     """
     Generates a music sequence using the model.
     start_sequence: tensor or list of starting tokens
+    seed: optional random seed for reproducibility
     """
+    if seed is not None:
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+    
     min_pitch = get_min_pitch_from_model(model) - 6
     start_token = encode_pitch(start_midi_pitch, min_pitch)
 

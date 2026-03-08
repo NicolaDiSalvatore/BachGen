@@ -18,17 +18,20 @@ SF2_FILENAME = os.getenv("SF2_FILENAME", "052_Florestan_Ahh_Choir.sf2")
 MODEL_REPO_ID = os.getenv("MODEL_REPO_ID", "NicolaDiSalvatore/BachGen1.0")
 MODEL_FILENAME = os.getenv("MODEL_FILENAME", "model.pth")
 
+DEPLOY_DIR = Path(os.getenv("DEPLOY_DIR", "deploy"))
+RESOURCES_DIR = Path(os.getenv("RESOURCES_DIR", "resources"))
+
 REPO_CONFIGS = [
     {
         "repo_id": SF2_REPO_ID,
         "filename": SF2_FILENAME,
         "repo_type": "dataset",
-        "local_dir": "/app/resources",
+        "local_dir": str(RESOURCES_DIR),
     },
     {
         "repo_id": MODEL_REPO_ID,
         "filename": MODEL_FILENAME,
-        "local_dir": "/app/deploy",
+        "local_dir": str(DEPLOY_DIR),
     },
 ]
 
@@ -57,8 +60,8 @@ def download_file(repo_id: str, filename: str, repo_type: str | None = None, loc
 
 
 def main():
-    Path("/app/resources").mkdir(parents=True, exist_ok=True)
-    Path("/app/deploy").mkdir(parents=True, exist_ok=True)
+    DEPLOY_DIR.mkdir(parents=True, exist_ok=True)
+    RESOURCES_DIR.mkdir(parents=True, exist_ok=True)
 
     for config in REPO_CONFIGS:
         try:

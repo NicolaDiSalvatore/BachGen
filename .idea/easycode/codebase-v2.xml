@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="com.obiscr.chatgpt.settings.EasyCodeState">
+    <option name="projectFiles" value="$PROJECT_DIR$/api/__init__.py;C:/Users/nicol/BachGen/api/main.py;C:/Users/nicol/BachGen/deploy/app.py;C:/Users/nicol/BachGen/rendering/__init__.py;C:/Users/nicol/BachGen/rendering/midi.py;C:/Users/nicol/BachGen/src/data/dataset.py;C:/Users/nicol/BachGen/src/data/vocab.py;C:/Users/nicol/BachGen/src/layers/embedding.py;C:/Users/nicol/BachGen/src/layers/feed_forward.py;C:/Users/nicol/BachGen/src/layers/linear.py;C:/Users/nicol/BachGen/src/layers/relu.py;C:/Users/nicol/BachGen/src/layers/self_attention.py;C:/Users/nicol/BachGen/src/layers/softmax.py;C:/Users/nicol/BachGen/src/models/transformer.py;C:/Users/nicol/BachGen/src/__init__.py;C:/Users/nicol/BachGen/src/generate.py;C:/Users/nicol/BachGen/app.yaml;C:/Users/nicol/BachGen/download_files.py;C:/Users/nicol/BachGen/README.md" />
+  </component>
+</project>
