@@ -1,24 +1,12 @@
----
-title: BachGen
-emoji: 🎵
-colorFrom: yellow
-colorTo: purple
-sdk: docker
-pinned: false
-license: mit
-short_description: Generate Bach chorale-style music with Transformer models
----
-
-BachGen is a music generation system that creates polyphonic chorales in the style of J.S. Bach. Built on a decoder-only Music Transformer architecture-voice harmonic progressions, it generates four token by token, producing MIDI files that capture the essence of Bach's compositional style.
+**BachGen** is a machine learning project for generating Bach chorales-style music.
+It uses MusicTransformer architecture to generate new audio sequences and provides a FastAPI backend and Gradio UI for interaction.
 
 ## Features
 
-- **Music Transformer Architecture** — Decoder-only Transformer trained on the JS Bach chorale dataset
-- **Flexible Sampling** — Temperature, top-k, and top-p (nucleus) sampling for controllable generation
-- **MIDI Output** — Generate downloadable MIDI files with configurable tempo
-- **Audio Synthesis** — Optional WAV rendering via fluidsynth for immediate playback
-- **REST API** — FastAPI-powered backend for programmatic generation
-- **Web Interface** — Gradio-powered UI for easy interaction
+- **MIDI Generation**: Generate new Bach-style chorales.
+- **Audio Synthesis**: Convert generated MIDI to WAV using Fluidsynth.
+- **Web Interface**: Interactive Gradio UI.
+- **API**: FastAPI endpoints for serving the model.
 
 ## Hugging Face Space
 
