@@ -51,18 +51,29 @@ docker run -p 7860:7860 bachgen
 ```
 
 ### API Usage
+
+**Linux/Mac:**
 ```bash
-curl -X POST "http://localhost:7860/api/generate" \
+run_id=$(curl -s -X POST "http://localhost:7860/api/generate" \
   -H "Content-Type: application/json" \
-  -d '{
-    "n_samples": 1,
-    "sequence_length": 512,
-    "temperature": 1.0,
-    "top_k": 0,
-    "top_p": 0.9,
-    "start_pitch": 60
-  }'
+  -d '{"n_samples":1,"sequence_length":256,"temperature":1.0,"top_k":0,"top_p":0.9,"start_pitch":60,"seed":0}' \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['run_id'])")
+
+curl -O "http://localhost:7860/api/download/$run_id"
 ```
+
+**Windows (PowerShell):**
+```powershell
+$response = Invoke-WebRequest -Uri "http://localhost:7860/api/generate" `
+  -Method POST `
+  -ContentType "application/json" `
+  -Body '{"n_samples":1,"sequence_length":256,"temperature":1.0,"top_k":0,"top_p":0.9,"start_pitch":60,"seed":0}'
+
+$run_id = ($response.Content | ConvertFrom-Json).run_id
+
+iwr -Uri "http://localhost:7860/api/download/$run_id" -OutFile "bachgen_output.zip"
+```
+
 
 
 ## Configuration
@@ -88,7 +99,18 @@ curl -X POST "http://localhost:7860/api/generate" \
 
 MIT License - see LICENSE file for details.
 
-## Acknowledgments
+## References
+Full BibTeX citations available in [`references.bib`](./references.bib).
+### Papers
+- Huang, C.-Z. A., Vaswani, A., Uszkoreit, J., Shazeer, N., Simon, I., Hawthorne, C., Dai, A. M.,
+  Hoffman, M. D., Dinculescu, M., & Eck, D. (2018). *Music Transformer*. arXiv:1809.04281.
+  https://arxiv.org/abs/1809.04281
 
-- [JS Bach Chorales Dataset](https://github.com/czhuang/JSB-Chorales-dataset) for training data
-- [Music Transformer](https://magenta.tensorflow.org/music-transformer) for architectural inspiration
+### Dataset
+- Boulanger-Lewandowski, N., Bengio, Y., & Vincent, P. (2012). *Modeling Temporal Dependencies
+  in High-Dimensional Sequences: Application to Polyphonic Music Generation and Transcription*.
+  arXiv:1206.6392. https://arxiv.org/abs/1206.6392
+
+### Soundfont
+- *Florestan Ahh Choir* [SF2 soundfont]. Public domain.
+  https://musical-artifacts.com/artifacts/388
