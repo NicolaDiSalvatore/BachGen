@@ -1,7 +1,7 @@
 __pycache__/
 .vscode/
 tests/
-.env
+.env.example
 src/config
 BachGen/
 BachGen1.0/

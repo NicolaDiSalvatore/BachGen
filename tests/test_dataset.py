@@ -1,9 +1,8 @@
 import json
-
 import pytest
 import torch
 
-from src.data.dataset_handwritten import BachDataset
+from src.data.dataset import BachDataset
 
 
 @pytest.fixture(scope="module")
