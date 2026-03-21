@@ -1,11 +1,7 @@
 __pycache__/
 .vscode/
-tests/
-.env.example
-src/config
 BachGen/
 BachGen1.0/
 *.pth
 repo-backup.git
-/data/
 *.sf2

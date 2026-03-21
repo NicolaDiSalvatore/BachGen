@@ -84,7 +84,7 @@ class BachDataset(Dataset):
         # Convert to tensor
         # Reusing the structure of convert_data_to_tensor but for single sequence
         time_steps = [torch.tensor(time_step) for time_step in encoded_sequence]
-        time_steps = torch.stack(time_steps).reshape(-1)
+        time_steps = torch.stack(time_steps)
 
         return time_steps, time_steps.shape[0]
 
