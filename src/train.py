@@ -533,7 +533,6 @@ def main():
     if args.run is not None:
         run_id = args.run
 
-
         client = MlflowClient()
         try:
             client.get_run(run_id)
@@ -541,12 +540,10 @@ def main():
         except Exception as e:
             raise ValueError(f"MLflow run {run_id} not found: {e}")
 
-
         run_path = experiment_path / run_id
         run_path.mkdir(parents=True, exist_ok=True)
         checkpoints_dir = run_path / "checkpoints"
         checkpoints_dir.mkdir(parents=True, exist_ok=True)
-
 
         print(f"Downloading checkpoints from MLflow run {run_id}...")
         if not download_checkpoints_for_resume(run_id, checkpoints_dir):

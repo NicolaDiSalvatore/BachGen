@@ -1,9 +1,6 @@
 import random
 from pathlib import Path
-
 import pretty_midi
-
-from src.data.dataset import BachDataset
 
 
 def sequences_to_midi(
