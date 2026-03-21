@@ -536,7 +536,7 @@ def main():
 
         client = MlflowClient()
         try:
-            mlflow_run = client.get_run(run_id)
+            client.get_run(run_id)
             print(f"Found MLflow run: {run_id}")
         except Exception as e:
             raise ValueError(f"MLflow run {run_id} not found: {e}")
