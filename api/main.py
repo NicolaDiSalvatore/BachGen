@@ -135,6 +135,20 @@ async def lifespan(app: FastAPI):
         model.eval()
         logger.info("Model loaded successfully!")
 
+        soundfont_path = project_path / "resources" / "052_Florestan_Ahh_Choir.sf2"
+        if not soundfont_path.exists():
+            logger.info("No local soundfont found, downloading from HuggingFace Hub...")
+            try:
+                downloaded_path = hf_hub_download(
+                    repo_id="NicolaDiSalvatore/florestan-ahh-choir-soundfont",
+                    filename="052_Florestan_Ahh_Choir.sf2",
+                    repo_type="dataset",
+                )
+                soundfont_path = Path(downloaded_path)
+                logger.info(f"Soundfont downloaded to {soundfont_path}")
+            except Exception as e:
+                logger.warning(f"Failed to download soundfont: {e}")
+
     except Exception as e:
         logger.exception(f"Failed to load model: {e}")
         raise
