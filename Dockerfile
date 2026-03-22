@@ -16,7 +16,6 @@ COPY --chown=user:user requirements.txt .
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
 
-
 COPY --chown=user:user . .
 
 RUN mkdir -p /app/resources /app/deploy \
@@ -26,7 +25,10 @@ USER user
 
 ENV HOME=/home/user \
     PYTHONPATH=/app \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    GRADIO_SERVER_PORT=7860 \
+    GRADIO_ROOT_PATH=/ \
+    GRADIO_SERVER_NAME=0.0.0.0
 
 EXPOSE 7860
 
