@@ -5,3 +5,4 @@ BachGen1.0/
 *.pth
 repo-backup.git
 *.sf2
+/outputs/
