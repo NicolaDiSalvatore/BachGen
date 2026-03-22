@@ -6,7 +6,7 @@ colorTo: purple
 sdk: gradio
 sdk_version: "6.9.0"
 python_version: "3.14.3"
-app_file: deploy/app.py
+command: python -m uvicorn api.main:app --host 0.0.0.0 --port $PORT
 pinned: false
 ---
 
