@@ -1,14 +1,3 @@
-FROM python:3.14.3-slim
-
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y \
-    libasound2-dev \
-    libportmidi-dev \
-    fluidsynth \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
 RUN useradd -m -u 1000 user
 
 COPY --chown=user:user requirements.txt .
