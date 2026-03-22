@@ -12,7 +12,7 @@ import gradio as gr
 import torch
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel, Field
 
 from huggingface_hub import hf_hub_download
@@ -195,6 +195,11 @@ logging.basicConfig(level=logging.INFO)
 @app.get("/api/status")
 def root():
     return {"status": "BachGen API running"}
+
+
+@app.get("/")
+def root_redirect():
+    return RedirectResponse(url="/gradio")
 
 
 @app.post("/api/generate", response_model=GenerateResponse)
