@@ -8,13 +8,14 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from os.path import abspath, dirname
 from pathlib import Path
-
 import gradio as gr
 import torch
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel, Field
+
+from huggingface_hub import hf_hub_download
 
 from rendering.midi import sequences_to_midi
 from src.generate import generate_sequences
@@ -31,7 +32,7 @@ def synthesize_midi(midi_path: Path, output_wav_path: Path):
 
     if not soundfont_path.exists():
         logger.warning(f"SoundFont not found at {soundfont_path}")
-        logger.warning("Set SOUNDFONT_PATH environment variable")
+        logger.warning(f"Set SOUNDFONT_PATH environment variable")
         return False
 
     try:
@@ -56,13 +57,6 @@ def synthesize_midi(midi_path: Path, output_wav_path: Path):
         logger.exception(f"Synthesis failed: {e}")
         return False
 
-
-app = FastAPI(
-    title="BachGen API",
-    description="Generate Bach-style chorales as MIDI files",
-    version="1.0.0",
-)
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("transformer_bach_dataset")
 
@@ -77,61 +71,80 @@ async def lifespan(app: FastAPI):
     global model
 
     local_model_path = Path(project_path) / "deploy" / "model.pth"
+
     if not local_model_path.exists():
-        raise ValueError(f"Model in path {local_model_path} not found")
-
-    if local_model_path.exists():
-        logger.info(f"Loading local model from {local_model_path}...")
+        logger.info("No local model found, downloading from HuggingFace Hub...")
         try:
-            checkpoint = torch.load(
-                local_model_path, map_location=torch.device("cpu"), weights_only=False
+            downloaded_path = hf_hub_download(
+                repo_id="NicolaDiSalvatore/BachGen1.0",
+                filename="model.pth",
+                repo_type="model",
             )
-
-            if (
-                isinstance(checkpoint, dict)
-                and "config" in checkpoint
-                and "model_state_dict" in checkpoint
-            ):
-                config = checkpoint["config"]
-                logger.info(f"Loading model with config: {config}")
-
-                model = MusicTransformer(
-                    vocab_size=config.get("vocab_size", 92),
-                    seq_len=config.get("seq_len", 2048),
-                    attention_hidden_dim=config.get(
-                        "attention_hidden_size", 512
-                    ),
-                    feedforward_hidden_dim=config.get("feedforward_hidden_dim", 2048),
-                    num_decoder_layers=config.get("num_decoder_layers", 6),
-                    num_attention_heads=config.get("num_attention_heads", 8),
-                    embed_dropout=config.get("embed_dropout", 0.0),
-                    ffn_dropout=config.get("ffn_dropout", 0.0),
-                    attn_dropout=config.get("attn_dropout", 0.0),
-                    attn_proj_dropout=config.get("attn_proj_dropout", 0.0),
-                )
-
-                model.load_state_dict(checkpoint["model_state_dict"])
-            elif isinstance(checkpoint, torch.nn.Module):
-                model = checkpoint
-            else:
-                logger.warning(
-                    "Unknown checkpoint format. Attempting to load as state dict with default config (RISKY)."
-                )
-
-                raise ValueError("Invalid checkpoint format")
-
-            model.eval()
-            logger.info("Local model loaded successfully!")
-
+            local_model_path = Path(downloaded_path)
+            logger.info(f"Model downloaded to {local_model_path}")
         except Exception as e:
-            logger.exception(f"Failed to load local model: {e}")
+            logger.exception(f"Failed to download model from HuggingFace Hub: {e}")
             raise
 
-    else:
-        logger.error(
-            f"Model file not found at {local_model_path}. Please ensure model.pth is present."
+    logger.info(f"Loading model from {local_model_path}...")
+    try:
+        checkpoint = torch.load(
+            local_model_path, map_location=torch.device("cpu"), weights_only=False
         )
-        raise FileNotFoundError(f"Model file not found at {local_model_path}")
+
+        if (
+            isinstance(checkpoint, dict)
+            and "config" in checkpoint
+            and "model_state_dict" in checkpoint
+        ):
+            config = checkpoint["config"]
+            logger.info(f"Loading model with config: {config}")
+
+            model = MusicTransformer(
+                vocab_size=config.get("vocab_size", 92),
+                seq_len=config.get("seq_len", 2048),
+                attention_hidden_dim=config.get(
+                    "attention_hidden_size", 512
+                ),
+                feedforward_hidden_dim=config.get("feedforward_hidden_dim", 2048),
+                num_decoder_layers=config.get("num_decoder_layers", 6),
+                num_attention_heads=config.get("num_attention_heads", 8),
+                embed_dropout=config.get("embed_dropout", 0.0),
+                ffn_dropout=config.get("ffn_dropout", 0.0),
+                attn_dropout=config.get("attn_dropout", 0.0),
+                attn_proj_dropout=config.get("attn_proj_dropout", 0.0),
+            )
+
+            model.load_state_dict(checkpoint["model_state_dict"])
+        elif isinstance(checkpoint, torch.nn.Module):
+            model = checkpoint
+        else:
+            logger.warning(
+                "Unknown checkpoint format. Attempting to load as state dict with default config (RISKY)."
+            )
+
+            raise ValueError("Invalid checkpoint format")
+
+        model.eval()
+        logger.info("Model loaded successfully!")
+
+        soundfont_path = project_path / "resources" / "052_Florestan_Ahh_Choir.sf2"
+        if not soundfont_path.exists():
+            logger.info("No local soundfont found, downloading from HuggingFace Hub...")
+            try:
+                downloaded_path = hf_hub_download(
+                    repo_id="NicolaDiSalvatore/florestan-ahh-choir-soundfont",
+                    filename="052_Florestan_Ahh_Choir.sf2",
+                    repo_type="dataset",
+                )
+                soundfont_path = Path(downloaded_path)
+                logger.info(f"Soundfont downloaded to {soundfont_path}")
+            except Exception as e:
+                logger.warning(f"Failed to download soundfont: {e}")
+
+    except Exception as e:
+        logger.exception(f"Failed to load model: {e}")
+        raise
 
     yield
 
@@ -139,7 +152,12 @@ async def lifespan(app: FastAPI):
     model = None
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="BachGen API",
+    description="Generate Bach-style chorales as MIDI files",
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
 
 MAX_SEQUENCE_LENGTH = 2048
@@ -177,6 +195,11 @@ logging.basicConfig(level=logging.INFO)
 @app.get("/api/status")
 def root():
     return {"status": "BachGen API running"}
+
+
+@app.get("/")
+def root_redirect():
+    return RedirectResponse(url="/gradio")
 
 
 @app.post("/api/generate", response_model=GenerateResponse)
@@ -325,7 +348,7 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
 
         with gr.Column():
             midi_out = gr.File(label="Download MIDI")
-            audio_out = gr.Audio(label="Play Generated MIDI", type="filepath")
+            audio_out = gr.Audio(label="Play Generated MIDI", type="filepath", interactive=False, format="wav")
 
     gen_btn.click(
         fn=gradio_generate,
@@ -341,4 +364,10 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
         outputs=[midi_out, audio_out],
     )
 
-app = gr.mount_gradio_app(app, demo, path="/")
+app = gr.mount_gradio_app(
+    app,
+    demo,
+    path="/gradio",
+    allowed_paths=[tempfile.gettempdir()],
+    ssr_mode=False,
+)

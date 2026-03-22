@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="b643a4b6-a84d-4242-8f13-2bc1b4010f95" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/BachGen/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/BachGen/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,6 +46,9 @@
       <recent name="C:\Users\nicol\BachGen\src" />
       <recent name="C:\Users\nicol\BachGen\resources" />
       <recent name="C:\Users\nicol\BachGen\src\config" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\nicol\BachGen" />
     </key>
   </component>
   <component name="SharedIndexes">
