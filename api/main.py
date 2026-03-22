@@ -32,7 +32,7 @@ def synthesize_midi(midi_path: Path, output_wav_path: Path):
 
     if not soundfont_path.exists():
         logger.warning(f"SoundFont not found at {soundfont_path}")
-        logger.warning(f"Set SOUNDFONT_PATH environment variable")
+        logger.warning("Set SOUNDFONT_PATH environment variable")
         return False
 
     try:
