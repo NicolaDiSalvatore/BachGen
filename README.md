@@ -5,7 +5,7 @@ colorFrom: indigo
 colorTo: purple
 sdk: gradio
 sdk_version: "4.44.0"
-python_version: "3.10"
+python_version: "3.11"
 app_file: deploy/app.py
 pinned: false
 ---
