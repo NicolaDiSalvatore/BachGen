@@ -24,4 +24,4 @@ EXPOSE 7860
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s \
   CMD curl -f http://localhost:7860/api/status || exit 1
 
-CMD ["python", "api/main.py"]
+CMD ["python", "app.py"]
