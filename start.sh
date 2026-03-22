@@ -17,7 +17,7 @@ if not model_path.exists():
 sf_path = Path('resources/052_Florestan_Ahh_Choir.sf2')
 if not sf_path.exists():
     print('Downloading soundfont...')
-    hf_hub_download(repo_id='NicolaDiSalvatore/florestan-ahh-choir-soundfont', filename='052_Florestan_Ahh_Choir.sf2', local_dir='resources')
+    hf_hub_download(repo_id='NicolaDiSalvatore/florestan-ahh-choir-soundfont', filename='052_Florestan_Ahh_Choir.sf2', repo_type='dataset', local_dir='resources')
 print('Download complete!')
 "
 

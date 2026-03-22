@@ -8,7 +8,6 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from os.path import abspath, dirname
 from pathlib import Path
-
 import gradio as gr
 import torch
 from dotenv import load_dotenv
@@ -332,7 +331,7 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
 
         with gr.Column():
             midi_out = gr.File(label="Download MIDI")
-            audio_out = gr.Audio(label="Play Generated MIDI", type="filepath")
+            audio_out = gr.Audio(label="Play Generated MIDI", type="filepath", interactive=False, autoplay=True, format="wav")
 
     gen_btn.click(
         fn=gradio_generate,
@@ -348,4 +347,4 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
         outputs=[midi_out, audio_out],
     )
 
-app = gr.mount_gradio_app(app, demo, path="/")
+app = gr.mount_gradio_app(app, demo, path="/", allowed_paths=[tempfile.gettempdir()])
