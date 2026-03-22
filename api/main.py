@@ -307,6 +307,8 @@ def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch, tempo
         logger.exception("Gradio generation failed")
         raise gr.Error(f"Generation failed: {str(e)}")
 
+os.environ["GRADIO_SERVER_PORT"] = "7860"
+os.environ["GRADIO_ROOT_PATH"] = "/"
 
 with gr.Blocks(title="Bach Chorale Generator") as demo:
     gr.Markdown("# Bach Chorale Generator (Transformer)")
@@ -359,4 +361,13 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
         outputs=[midi_out, audio_out],
     )
 
-app = gr.mount_gradio_app(app, demo, path="/", allowed_paths=[tempfile.gettempdir()], root_path="/")
+app = gr.mount_gradio_app(
+    app,
+    demo,
+    path="/",
+    allowed_paths=[tempfile.gettempdir()],
+    root_path="/"
+)
+
+#
+# app = gr.mount_gradio_app(app, demo, path="/", allowed_paths=[tempfile.gettempdir()], root_path="/")
