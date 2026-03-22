@@ -331,7 +331,7 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
 
         with gr.Column():
             midi_out = gr.File(label="Download MIDI")
-            audio_out = gr.Audio(label="Play Generated MIDI", type="filepath", interactive=False, autoplay=True, format="wav")
+            audio_out = gr.Audio(label="Play Generated MIDI", type="filepath", interactive=False, format="wav")
 
     gen_btn.click(
         fn=gradio_generate,
