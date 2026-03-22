@@ -1,7 +1,9 @@
-FROM python:3.14.3-slim
+
+FROM python:3.14.3
 
 WORKDIR /app
 
+# System dependencies: audio/MIDI support + fluidsynth for synthesis
 RUN apt-get update && apt-get install -y \
     libasound2-dev \
     libportmidi-dev \
@@ -9,31 +11,32 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Create non-root user
 RUN useradd -m -u 1000 user
 
+# Install dependencies
 COPY --chown=user:user requirements.txt .
 
+# PyTorch CPU-only (keeps image smaller than the default CUDA build)
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
+# Remaining Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-
+# Copy application code
 COPY --chown=user:user . .
 
-RUN mkdir -p /app/resources /app/deploy \
-    && chown -R user:user /app
+# Create expected runtime directories
+RUN mkdir -p /app/resources /app/deploy
 
-COPY --chown=user:user start.sh .
-RUN chmod +x start.sh
+# Download model weights / data files
+RUN python download_files.py
 
 USER user
 
 ENV HOME=/home/user \
-    PYTHONPATH=/app \
-    PYTHONUNBUFFERED=1
+    PYTHONPATH=/app
 
 EXPOSE 7860
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s \
-  CMD curl -f http://localhost:7860/health || exit 1
-
-CMD ["./start.sh"]
+CMD ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "7860"]
