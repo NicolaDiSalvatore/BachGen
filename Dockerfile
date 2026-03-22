@@ -33,6 +33,6 @@ ENV HOME=/home/user \
 EXPOSE 7860
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s \
-  CMD curl -f http://localhost:7860/health || exit 1
+  CMD curl -f http://localhost:7860/api/status || exit 1
 
 CMD ["python", "-c", "import api.main"]
