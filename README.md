@@ -6,7 +6,7 @@ colorTo: purple
 sdk: gradio
 sdk_version: "6.9.0"
 python_version: "3.14.3"
-command: python -c "from api.main import app; import uvicorn; import os; uvicorn.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 7860)))"
+app_file: deploy/app.py
 pinned: false
 ---
 

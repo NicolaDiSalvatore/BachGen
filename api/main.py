@@ -57,13 +57,6 @@ def synthesize_midi(midi_path: Path, output_wav_path: Path):
         logger.exception(f"Synthesis failed: {e}")
         return False
 
-
-app = FastAPI(
-    title="BachGen API",
-    description="Generate Bach-style chorales as MIDI files",
-    version="1.0.0",
-)
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("transformer_bach_dataset")
 
@@ -159,7 +152,12 @@ async def lifespan(app: FastAPI):
     model = None
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="BachGen API",
+    description="Generate Bach-style chorales as MIDI files",
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
 
 MAX_SEQUENCE_LENGTH = 2048
@@ -361,4 +359,4 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
         outputs=[midi_out, audio_out],
     )
 
-app = gr.mount_gradio_app(app, demo, path="/", allowed_paths=[tempfile.gettempdir()])
+app = gr.mount_gradio_app(app, demo, path="/", allowed_paths=[tempfile.gettempdir()], root_path="/")
