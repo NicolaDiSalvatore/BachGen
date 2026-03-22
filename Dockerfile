@@ -16,7 +16,11 @@ COPY --chown=user:user requirements.txt .
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 COPY --chown=user:user . .
+
+RUN python download_files.py
+
 
 RUN mkdir -p /app/resources /app/deploy \
     && python download_files.py \
