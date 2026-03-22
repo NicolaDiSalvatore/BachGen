@@ -1,6 +1,6 @@
 # BachGen
 
-![Build](https://img.shields.io/github/actions/workflow/status/NicolaDiSalvatore/BachGen/ci.yml?branch=main)
+[![BachGen CI](https://github.com/NicolaDiSalvatore/BachGen/actions/workflows/ci.yml/badge.svg)](https://github.com/NicolaDiSalvatore/BachGen/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![HuggingFace Space](https://img.shields.io/badge/🤗%20Space-live%20demo-yellow)](https://huggingface.co/spaces/NicolaDiSalvatore/BachGen)
