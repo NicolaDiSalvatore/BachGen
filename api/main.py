@@ -362,7 +362,7 @@ with gr.Blocks(title="Bach Chorale Generator") as demo:
 app = gr.mount_gradio_app(
     app,
     demo,
-    path="/",
+    path="/gradio",
     allowed_paths=[tempfile.gettempdir()],
     ssr_mode=False,
 )
