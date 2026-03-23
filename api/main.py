@@ -371,6 +371,6 @@ app = gr.mount_gradio_app(
     app,
     demo,
     path="/gradio",
-    allowed_paths=[tempfile.gettempdir()],
+    allowed_paths=[tempfile.gettempdir(), "/tmp"],
     ssr_mode=False,
 )
