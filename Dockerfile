@@ -1,11 +1,3 @@
-FROM python:3.14.3
-
-RUN apt-get update && apt-get install -y \
-    fluidsynth \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-
 RUN useradd -m -u 1000 user
 
 COPY --chown=user:user requirements.txt .

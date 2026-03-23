@@ -9,4 +9,3 @@ pretty_midi==0.2.11
 numpy==2.4.3
 mlflow==3.10.1
 PyYAML==6.0.3
-midi2audio==0.1.1
