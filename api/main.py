@@ -26,14 +26,14 @@ load_dotenv()
 
 
 def synthesize_midi(midi_path: Path, output_wav_path: Path):
-    """
-    Synthesize MIDI to WAV using fluidsynth
-    """
     soundfont_path = Path(os.getenv("SOUNDFONT_PATH", str(project_path / "resources" / "052_Florestan_Ahh_Choir.sf2")))
 
+    logger.info(f"synthesize_midi called: midi={midi_path}, out={output_wav_path}")
+    logger.info(f"MIDI exists: {midi_path.exists()}")
+    logger.info(f"Soundfont path: {soundfont_path}, exists: {soundfont_path.exists()}")
+
     if not soundfont_path.exists():
-        logger.warning(f"SoundFont not found at {soundfont_path}")
-        logger.warning(f"Set SOUNDFONT_PATH environment variable")
+        logger.error(f"SoundFont not found at {soundfont_path}")  # ← was WARNING, now ERROR
         return False
 
     try:
@@ -307,9 +307,10 @@ def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch, tempo
         wav_path = tmp_dir / f"{midi_path.stem}.wav"
 
         if synthesize_midi(midi_path, wav_path):
+            logger.info(f"WAV generated at {wav_path}, exists: {wav_path.exists()}, size: {wav_path.stat().st_size}")
             return str(midi_path), str(wav_path)
         else:
-            return str(midi_path), None
+            raise gr.Error("Audio synthesis failed — check Space logs for details")
 
     except Exception as e:
         logger.exception("Gradio generation failed")
