@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import subprocess
 import tempfile
 import uuid
@@ -137,8 +138,10 @@ async def lifespan(app: FastAPI):
                     filename="052_Florestan_Ahh_Choir.sf2",
                     repo_type="dataset",
                 )
-                soundfont_path = Path(downloaded_path)
-                logger.info(f"Soundfont downloaded to {soundfont_path}")
+                resources_dir = project_path / "resources"
+                resources_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(downloaded_path, soundfont_path)
+                logger.info(f"Soundfont downloaded and saved to {soundfont_path}")
             except Exception as e:
                 logger.warning(f"Failed to download soundfont: {e}")
 
