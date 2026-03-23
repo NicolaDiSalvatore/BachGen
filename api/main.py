@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import subprocess
 import tempfile
 import uuid
@@ -21,41 +22,31 @@ from rendering.midi import sequences_to_midi
 from src.generate import generate_sequences
 from src.models.transformer import MusicTransformer
 
+try:
+    result = subprocess.run(["fluidsynth", "--version"], capture_output=True)
+except FileNotFoundError:
+    os.system("apt-get update -qq && apt-get install -y -qq fluidsynth")
+
 load_dotenv()
 
 
 def synthesize_midi(midi_path: Path, output_wav_path: Path):
-    """
-    Synthesize MIDI to WAV using fluidsynth
-    """
     soundfont_path = Path(os.getenv("SOUNDFONT_PATH", str(project_path / "resources" / "052_Florestan_Ahh_Choir.sf2")))
 
     if not soundfont_path.exists():
-        logger.warning(f"SoundFont not found at {soundfont_path}")
-        logger.warning("Set SOUNDFONT_PATH environment variable")
+        logger.error(f"SoundFont not found at {soundfont_path}")
         return False
 
     try:
-        cmd = [
-            "fluidsynth",
-            "-F",
-            str(output_wav_path),
-            str(soundfont_path),
-            str(midi_path),
-        ]
-
-        logger.info(f"Running synthesis: {' '.join(cmd)}")
-        subprocess.run(cmd, check=True, capture_output=True)
-        return True
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Fluidsynth failed: {e.stderr.decode() if e.stderr else str(e)}")
-        return False
-    except FileNotFoundError:
-        logger.warning("Fluidsynth executable not found. Skipping synthesis.")
-        return False
+        from midi2audio import FluidSynth
+        fs = FluidSynth(sound_font=str(soundfont_path))
+        fs.midi_to_audio(str(midi_path), str(output_wav_path))
+        logger.info(f"WAV generated: {output_wav_path}, exists: {output_wav_path.exists()}")
+        return output_wav_path.exists()
     except Exception as e:
         logger.exception(f"Synthesis failed: {e}")
         return False
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("transformer_bach_dataset")
@@ -93,9 +84,9 @@ async def lifespan(app: FastAPI):
         )
 
         if (
-            isinstance(checkpoint, dict)
-            and "config" in checkpoint
-            and "model_state_dict" in checkpoint
+                isinstance(checkpoint, dict)
+                and "config" in checkpoint
+                and "model_state_dict" in checkpoint
         ):
             config = checkpoint["config"]
             logger.info(f"Loading model with config: {config}")
@@ -137,8 +128,10 @@ async def lifespan(app: FastAPI):
                     filename="052_Florestan_Ahh_Choir.sf2",
                     repo_type="dataset",
                 )
-                soundfont_path = Path(downloaded_path)
-                logger.info(f"Soundfont downloaded to {soundfont_path}")
+                resources_dir = project_path / "resources"
+                resources_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(downloaded_path, soundfont_path)
+                logger.info(f"Soundfont downloaded and saved to {soundfont_path}")
             except Exception as e:
                 logger.warning(f"Failed to download soundfont: {e}")
 
@@ -158,7 +151,6 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
-
 
 MAX_SEQUENCE_LENGTH = 2048
 MAX_SAMPLES = 16
@@ -204,7 +196,6 @@ def root_redirect():
 
 @app.post("/api/generate", response_model=GenerateResponse)
 def generate(req: GenerateRequest):
-
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:6]
     logger.info(f"Starting generation run {run_id}")
 
@@ -250,7 +241,6 @@ def generate(req: GenerateRequest):
 
 @app.get("/api/download/{run_id}")
 def download(run_id: str):
-
     tmp_root = Path(tempfile.gettempdir())
     matches = list(tmp_root.glob(f"transformer_bach_dataset_{run_id}*"))
 
@@ -278,12 +268,12 @@ def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch, tempo
     try:
         tempo_value = int(tempo_bpm)
         logger.info(f"Generating with tempo_bpm: {tempo_value}, seed: {seed}")
-        
+
         run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         tmp_dir = Path(tempfile.mkdtemp(prefix=f"gradio_bach_{run_id}"))
 
         seed_value = int(seed) if seed is not None and seed > 0 else None
-        
+
         sequences = generate_sequences(
             model=model,
             length=int(length_tokens),
@@ -304,9 +294,10 @@ def gradio_generate(length_tokens, temperature, top_k, top_p, start_pitch, tempo
         wav_path = tmp_dir / f"{midi_path.stem}.wav"
 
         if synthesize_midi(midi_path, wav_path):
+            logger.info(f"WAV generated at {wav_path}, exists: {wav_path.exists()}, size: {wav_path.stat().st_size}")
             return str(midi_path), str(wav_path)
         else:
-            return str(midi_path), None
+            raise gr.Error("Audio synthesis failed — check Space logs for details")
 
     except Exception as e:
         logger.exception("Gradio generation failed")
@@ -368,6 +359,6 @@ app = gr.mount_gradio_app(
     app,
     demo,
     path="/gradio",
-    allowed_paths=[tempfile.gettempdir()],
+    allowed_paths=[tempfile.gettempdir(), "/tmp"],
     ssr_mode=False,
 )
