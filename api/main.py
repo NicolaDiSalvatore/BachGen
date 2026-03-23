@@ -22,6 +22,12 @@ from rendering.midi import sequences_to_midi
 from src.generate import generate_sequences
 from src.models.transformer import MusicTransformer
 
+
+try:
+    result = subprocess.run(["fluidsynth", "--version"], capture_output=True)
+except FileNotFoundError:
+    os.system("apt-get update -qq && apt-get install -y -qq fluidsynth")
+
 load_dotenv()
 
 
