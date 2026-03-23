@@ -28,32 +28,16 @@ load_dotenv()
 def synthesize_midi(midi_path: Path, output_wav_path: Path):
     soundfont_path = Path(os.getenv("SOUNDFONT_PATH", str(project_path / "resources" / "052_Florestan_Ahh_Choir.sf2")))
 
-    logger.info(f"synthesize_midi called: midi={midi_path}, out={output_wav_path}")
-    logger.info(f"MIDI exists: {midi_path.exists()}")
-    logger.info(f"Soundfont path: {soundfont_path}, exists: {soundfont_path.exists()}")
-
     if not soundfont_path.exists():
-        logger.error(f"SoundFont not found at {soundfont_path}")  # ← was WARNING, now ERROR
+        logger.error(f"SoundFont not found at {soundfont_path}")
         return False
 
     try:
-        cmd = [
-            "fluidsynth",
-            "-F",
-            str(output_wav_path),
-            str(soundfont_path),
-            str(midi_path),
-        ]
-
-        logger.info(f"Running synthesis: {' '.join(cmd)}")
-        subprocess.run(cmd, check=True, capture_output=True)
-        return True
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Fluidsynth failed: {e.stderr.decode() if e.stderr else str(e)}")
-        return False
-    except FileNotFoundError:
-        logger.warning("Fluidsynth executable not found. Skipping synthesis.")
-        return False
+        from midi2audio import FluidSynth
+        fs = FluidSynth(sound_font=str(soundfont_path))
+        fs.midi_to_audio(str(midi_path), str(output_wav_path))
+        logger.info(f"WAV generated: {output_wav_path}, exists: {output_wav_path.exists()}")
+        return output_wav_path.exists()
     except Exception as e:
         logger.exception(f"Synthesis failed: {e}")
         return False
