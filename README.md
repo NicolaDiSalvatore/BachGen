@@ -33,9 +33,9 @@ SATB chorale → pitch tokenisation → sinusoidal positional encoding
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.14.3
 - [Fluidsynth](https://www.fluidsynth.org/) (for WAV audio synthesis — optional, MIDI always works)
-- A SoundFont file (set `SOUNDFONT_PATH` env variable, or use the default path)
+- A SoundFont file
 
 ---
 
