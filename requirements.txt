@@ -10,3 +10,4 @@ numpy==2.4.3
 mlflow==3.10.1
 PyYAML==6.0.3
 tensorboard==2.20.0
+midi2audio==0.1.1
