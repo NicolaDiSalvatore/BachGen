@@ -6,3 +6,4 @@ BachGen1.0/
 repo-backup.git
 *.sf2
 /outputs/
+.idea/
