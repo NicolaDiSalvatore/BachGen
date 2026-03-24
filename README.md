@@ -9,6 +9,10 @@
 
 > **Try it now →** [huggingface.co/spaces/NicolaDiSalvatore/BachGen](https://huggingface.co/spaces/NicolaDiSalvatore/BachGen)
 
+![BachGen UI](assets/screenshot.png)
+
+
+[▶ Listen to a sample](assets/sample.wav)
 ---
 
 ## Architecture
@@ -36,10 +40,6 @@ SATB chorale → pitch tokenisation → sinusoidal positional encoding
 ---
 
 ## Quick Start
-
-### Hugging Face Space (no install)
-
-The easiest way — go to the [live demo](https://huggingface.co/spaces/NicolaDiSalvatore/BachGen) and generate directly in your browser.
 
 ### Local deployment
 
