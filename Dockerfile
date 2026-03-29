@@ -1,16 +1,17 @@
-FROM python:3.14.3
+FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y \
     fluidsynth \
     curl \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -u 1000 user
 
 COPY --chown=user:user requirements.txt .
 
-RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=user:user . .
 
