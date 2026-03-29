@@ -10,8 +10,8 @@ RUN useradd -m -u 1000 user
 
 COPY --chown=user:user requirements.txt .
 
-RUN pip install --no-cache-dir torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --prefer-binary torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu && \                      9% used
+  pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 COPY --chown=user:user . .
 
