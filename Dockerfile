@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
 
 RUN useradd -m -u 1000 user
 
+WORKDIR /app
+
 COPY --chown=user:user requirements.txt .
 
 RUN pip install --no-cache-dir --prefer-binary torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu && \                      9% used
@@ -15,8 +17,9 @@ RUN pip install --no-cache-dir --prefer-binary torch==2.5.1 --index-url https://
 
 COPY --chown=user:user . .
 
-RUN mkdir -p /app/resources /app/deploy \
-    && chown -R user:user /app
+RUN mkdir -p resources deploy
+
+RUN python download_files.py
 
 USER user
 
