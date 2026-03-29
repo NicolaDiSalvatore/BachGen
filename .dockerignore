@@ -8,3 +8,4 @@ repo-backup.git
 .gitattributes
 .github
 .gitignore
+.idea

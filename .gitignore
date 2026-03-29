@@ -9,3 +9,4 @@ BachGen1.0/
 repo-backup.git
 /data/
 *.sf2
+.idea/
