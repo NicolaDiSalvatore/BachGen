@@ -1,35 +1,36 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
-RUN apt-get update && apt-get install -y \
-    fluidsynth \
-    curl \
-    libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN useradd -m -u 1000 user
+WORKDIR /home/user/app
 
+ENV PYTHONPATH=/home/user/app
+
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    fluidsynth \
+    libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first (cache optimization)
 COPY --chown=user:user requirements.txt .
 
-RUN pip install --no-cache-dir --prefer-binary torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu && \                      9% used
-  pip install --no-cache-dir --prefer-binary -r requirements.txt
+# Upgrade pip (important for dependency resolution)
+RUN pip install --no-cache-dir --upgrade pip
+
+RUN pip install --no-cache-dir \
+    torch --index-url https://download.pytorch.org/whl/cpu
+
+RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 COPY --chown=user:user . .
 
-RUN mkdir -p /app/resources /app/deploy \
-    && chown -R user:user /app
-
+# Switch user
 USER user
 
-ENV HOME=/home/user \
-    PYTHONPATH=/app \
-    PYTHONUNBUFFERED=1 \
-    GRADIO_SERVER_PORT=7860 \
-    GRADIO_ROOT_PATH=/ \
-    GRADIO_SERVER_NAME=0.0.0.0
-
+# Expose port (Spaces uses 7860)
 EXPOSE 7860
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s \
-  CMD curl -f http://localhost:7860/api/status || exit 1
-
-CMD ["python", "app.py"]
+# Start app (adjust if needed)
+CMD ["python", "-m", "deploy.app"]

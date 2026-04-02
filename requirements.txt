@@ -5,8 +5,7 @@ huggingface-hub==1.7.2
 python-dotenv==1.2.2
 pydantic==2.12.5
 pretty_midi==0.2.11
-torch==2.5.1
-numpy==2.4.3
+numpy==1.26.4
 mlflow==3.10.1
 PyYAML==6.0.3
 midi2audio==0.1.1
