@@ -1,7 +1,7 @@
 # BachGen
 
 [![BachGen CI](https://github.com/NicolaDiSalvatore/BachGen/actions/workflows/ci.yml/badge.svg)](https://github.com/NicolaDiSalvatore/BachGen/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/python-3.14.3-blue)
+![Python](https://img.shields.io/badge/python-3.10--slim-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![HuggingFace Space](https://img.shields.io/badge/🤗%20Space-live%20demo-yellow)](https://huggingface.co/spaces/NicolaDiSalvatore/BachGen)
 
@@ -19,11 +19,6 @@
 
 BachGen uses a **MusicTransformer** built from scratch:
 
-```
-SATB chorale → pitch tokenisation → sinusoidal positional encoding
-    → causal transformer (cross-entropy loss) → autoregressive sampling → MIDI
-```
-
 - 4-voice SATB input encoded as flat pitch token sequences
 - Causal masking for autoregressive generation
 - Pitch augmentation during training for transposition robustness
@@ -33,10 +28,8 @@ SATB chorale → pitch tokenisation → sinusoidal positional encoding
 
 ## Prerequisites
 
-- Python 3.14.3
-- [Fluidsynth](https://www.fluidsynth.org/) (for WAV audio synthesis — optional, MIDI always works)
-- A SoundFont file
-
+- Python 3.10
+- [Fluidsynth](https://www.fluidsynth.org/) (for WAV audio synthesis (optional, MIDI always works))
 ---
 
 ## Quick Start
@@ -45,7 +38,7 @@ SATB chorale → pitch tokenisation → sinusoidal positional encoding
 
 ```bash
 pip install -r requirements.txt
-python download_files.py        # downloads model weights
+python download_files.py
 python -m uvicorn deploy.app:app --host 0.0.0.0 --port 7860
 ```
 
@@ -104,22 +97,6 @@ Invoke-WebRequest -Uri "http://localhost:7860/api/download/$run_id" -OutFile "ba
 | `top_p` | Nucleus sampling probability | `0.9` |
 | `start_pitch` | Starting MIDI pitch (60 = middle C) | `60` |
 | `seed` | Random seed (`0` = random) | `0` |
-
----
-
-## Project Structure
-
-```
-src/
-├── train.py              # Training script with MLflow tracking
-├── generate.py           # Inference and sampling
-├── data/                 # Dataset, dataloader, vocab
-├── models/               # MusicTransformer architecture
-├── layers/               # Custom layer implementations
-api/                      # FastAPI backend
-deploy/                   # FastAPI app entry point
-tests/                    # Unit tests
-```
 
 ---
 
