@@ -192,7 +192,7 @@ def root():
 
 @app.get("/")
 def root_redirect():
-    return RedirectResponse(url="/gradio")
+    return RedirectResponse(url="/gradio/")
 
 
 @app.post("/api/generate", response_model=GenerateResponse)
