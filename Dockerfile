@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir --upgrade pip
 
 RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
 
+WORKDIR /home/user/app
 COPY . .
 
 EXPOSE 7860
